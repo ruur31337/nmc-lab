@@ -1,0 +1,148 @@
+<svg viewBox="0 0 940 500" xmlns="http://www.w3.org/2000/svg"
+       role="img" aria-label="NMC Pentest Lab topology diagram">
+    <defs>
+      <marker id="a-gray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#2a3f52"/>
+      </marker>
+      <marker id="a-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0,8 3,0 6" fill="#f79a32"/>
+      </marker>
+      <filter id="g-red" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="4" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="g-orange" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="3" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="g-yellow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="2.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- ── Docker network boundary ── -->
+    <rect x="28" y="178" width="884" height="310" rx="14"
+          fill="#0d1520" stroke="#1e2d3d" stroke-width="1.5" stroke-dasharray="7,4"/>
+    <text x="50" y="202" font-family="JetBrains Mono,monospace" font-size="10"
+          fill="#1e2d3d" letter-spacing="0.1em">nmc-school  [bridge]</text>
+
+    <!-- ══════════════ ATTACKER ══════════════ -->
+    <g transform="translate(470,24)">
+      <rect x="-96" y="0" width="192" height="54" rx="8"
+            fill="#131920" stroke="#2a3f52" stroke-width="1.5"/>
+      <text x="0" y="22" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="13" font-weight="700" fill="#cdd6e0">ATTACKER</text>
+      <text x="0" y="40" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#3a5060">Browser · ffuf · curl · git-dumper</text>
+    </g>
+
+    <!-- Attacker → nginx -->
+    <line x1="470" y1="80" x2="470" y2="146"
+          stroke="#2a3f52" stroke-width="1.5" marker-end="url(#a-gray)"/>
+    <text x="482" y="117" font-family="JetBrains Mono,monospace" font-size="9"
+          fill="#2a3f52">Host: *.nmc.local</text>
+
+    <!-- ══════════════ NGINX ══════════════ -->
+    <g transform="translate(470,148)">
+      <rect x="-128" y="0" width="256" height="56" rx="8"
+            fill="#0f1c14" stroke="#39d353" stroke-width="1.8"/>
+      <text x="0" y="22" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="13" font-weight="700" fill="#39d353">nmc-nginx</text>
+      <text x="0" y="39" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#3a6040">nginx:alpine  ·  :80  →  vhost routing</text>
+    </g>
+
+    <!-- nginx fan-out lines -->
+    <path d="M 375 206 C 340 230 220 240 172 254"
+          fill="none" stroke="#2a3f52" stroke-width="1.5" marker-end="url(#a-gray)"/>
+    <path d="M 425 206 L 342 254"
+          fill="none" stroke="#2a3f52" stroke-width="1.5" marker-end="url(#a-gray)"/>
+    <path d="M 515 206 L 598 254"
+          fill="none" stroke="#2a3f52" stroke-width="1.5" marker-end="url(#a-gray)"/>
+    <path d="M 565 206 C 600 230 730 240 768 254"
+          fill="none" stroke="#2a3f52" stroke-width="1.5" marker-end="url(#a-gray)"/>
+
+    <!-- Port labels -->
+    <text x="234" y="238" font-family="JetBrains Mono,monospace" font-size="9" fill="#2a3f52">:5300</text>
+    <text x="364" y="238" font-family="JetBrains Mono,monospace" font-size="9" fill="#2a3f52">:5200</text>
+    <text x="566" y="238" font-family="JetBrains Mono,monospace" font-size="9" fill="#2a3f52">:5100</text>
+    <text x="688" y="238" font-family="JetBrains Mono,monospace" font-size="9" fill="#2a3f52">:5400</text>
+
+    <!-- ══════════════ MAIN-WEB (red) ══════════════ -->
+    <g transform="translate(60,258)" filter="url(#g-red)">
+      <rect x="0" y="0" width="208" height="80" rx="10"
+            fill="#160c0c" stroke="#f05454" stroke-width="2"/>
+      <rect x="0" y="0" width="208" height="28" rx="10" fill="#f05454" opacity="0.14"/>
+      <rect x="0" y="18" width="208" height="10" fill="#f05454" opacity="0.14"/>
+      <text x="104" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="13" font-weight="700" fill="#f05454">nmc-main-web</text>
+      <text x="104" y="44" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="10" fill="#8a9aaa">Apache / PHP  ·  :80</text>
+      <text x="104" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#4a6070">www.nmc.local</text>
+    </g>
+
+    <!-- ══════════════ ACADEMY (orange) ══════════════ -->
+    <g transform="translate(284,258)" filter="url(#g-orange)">
+      <rect x="0" y="0" width="208" height="80" rx="10"
+            fill="#161008" stroke="#f79a32" stroke-width="2"/>
+      <rect x="0" y="0" width="208" height="28" rx="10" fill="#f79a32" opacity="0.13"/>
+      <rect x="0" y="18" width="208" height="10" fill="#f79a32" opacity="0.13"/>
+      <text x="104" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="13" font-weight="700" fill="#f79a32">nmc-academy</text>
+      <text x="104" y="44" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="10" fill="#8a9aaa">Node.js / Express  ·  :4000</text>
+      <text x="104" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#4a6070">academy.nmc.local</text>
+    </g>
+
+    <!-- ══════════════ ADMISSION (orange) ══════════════ -->
+    <g transform="translate(508,258)" filter="url(#g-orange)">
+      <rect x="0" y="0" width="208" height="80" rx="10"
+            fill="#161008" stroke="#f79a32" stroke-width="2"/>
+      <rect x="0" y="0" width="208" height="28" rx="10" fill="#f79a32" opacity="0.13"/>
+      <rect x="0" y="18" width="208" height="10" fill="#f79a32" opacity="0.13"/>
+      <text x="104" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="13" font-weight="700" fill="#f79a32">nmc-admission</text>
+      <text x="104" y="44" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="10" fill="#8a9aaa">Flask / Python  ·  :5000</text>
+      <text x="104" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#4a6070">admission.nmc.local</text>
+    </g>
+
+    <!-- ══════════════ REGISTRAR (yellow) ══════════════ -->
+    <g transform="translate(732,258)" filter="url(#g-yellow)">
+      <rect x="0" y="0" width="180" height="80" rx="10"
+            fill="#131410" stroke="#f0c060" stroke-width="2"/>
+      <rect x="0" y="0" width="180" height="28" rx="10" fill="#f0c060" opacity="0.10"/>
+      <rect x="0" y="18" width="180" height="10" fill="#f0c060" opacity="0.10"/>
+      <text x="90" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="13" font-weight="700" fill="#f0c060">nmc-registrar</text>
+      <text x="90" y="44" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="10" fill="#8a9aaa">Apache / PHP  ·  :80</text>
+      <text x="90" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#4a6070">registrar.nmc.local</text>
+    </g>
+
+    <!-- ══════════════ MYSQL DB ══════════════ -->
+    <g transform="translate(746,388)">
+      <rect x="0" y="0" width="152" height="60" rx="7"
+            fill="#0c1218" stroke="#1e3040" stroke-width="1.2"/>
+      <text x="76" y="22" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="11" font-weight="600" fill="#3a5468">nmc-registrar-db</text>
+      <text x="76" y="38" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="9.5" fill="#2a4050">MySQL 8.0  ·  :3306</text>
+      <text x="76" y="52" text-anchor="middle" font-family="JetBrains Mono,monospace"
+            font-size="8.5" fill="#1e3040">nmc_registrar</text>
+    </g>
+
+    <!-- Registrar → MySQL -->
+    <line x1="822" y1="338" x2="822" y2="385"
+          stroke="#2a3f52" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#a-gray)"/>
+    <text x="834" y="364" font-family="JetBrains Mono,monospace" font-size="8.5"
+          fill="#2a3f52">mysqli</text>
+
+
+
+  </svg>
