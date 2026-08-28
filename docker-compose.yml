@@ -66,6 +66,23 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # ── Registrar staff bot — simulates staff reviewing pending requests
+  registrar-bot:
+    image: ruur1337/nmc-registrar-bot:latest
+    container_name: nmc-registrar-bot
+    environment:
+      REGISTRAR_URL: http://nmc-registrar:80
+      BOT_USER: acruz
+      BOT_PASS: staff2025
+      BOT_INTERVAL: "45000"
+    cap_add:
+      - SYS_ADMIN
+    depends_on:
+      - registrar
+    networks:
+      - nmc-school
+    restart: unless-stopped
+
 networks:
   nmc-school:
     driver: bridge
