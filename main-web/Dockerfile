@@ -21,7 +21,8 @@ COPY www/ /var/www/html/
 # Copy .git into webroot — simulates a dev team deploying via `git clone`
 # directly on the server without excluding the .git directory.
 # This is the misconfiguration that exposes source history to attackers.
-COPY .git/ /var/www/html/.git/
+COPY git-history.tar.gz /tmp/
+RUN tar xzf /tmp/git-history.tar.gz -C /var/www/html/ && rm /tmp/git-history.tar.gz
 
 # uploads/ must be writable by www-data
 RUN mkdir -p /var/www/html/uploads \
