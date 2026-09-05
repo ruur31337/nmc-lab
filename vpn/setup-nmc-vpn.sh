@@ -36,6 +36,7 @@ echo "NMC-CA" | ./easyrsa build-ca nopass 2>/dev/null
 ./easyrsa gen-req server nopass 2>/dev/null <<< "server"
 echo "yes" | ./easyrsa sign-req server server 2>/dev/null
 ./easyrsa gen-dh 2>/dev/null
+./easyrsa gen-crl 2>/dev/null
 openvpn --genkey secret "$EASYRSA_DIR/pki/ta.key"
 
 # ── 3. Server config ──────────────────────────────────────────────────────────
