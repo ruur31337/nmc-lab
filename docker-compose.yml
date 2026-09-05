@@ -2,7 +2,7 @@ services:
 
   # ── Reverse proxy — routes all NMC domains on ${LAB_PORT:-9100}
   nginx:
-    image: ruur1337/nmc-nginx:latest
+    build: ./nginx
     ports:
       - "${LAB_PORT:-9100}:80"
     depends_on:
