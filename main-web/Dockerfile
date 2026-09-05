@@ -12,6 +12,9 @@ RUN apt-get update \
 RUN printf 'defaults\ntimeout 2\n\naccount default\nhost 127.0.0.1\nport 25\nfrom no-reply@nmc.edu.ph\n' \
  > /etc/msmtprc && chmod 644 /etc/msmtprc
 
+# Copy PHP config — enforces disable_functions
+COPY php.ini /usr/local/etc/php/php.ini
+
 # Copy Apache vhost config
 COPY apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
