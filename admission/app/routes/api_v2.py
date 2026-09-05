@@ -6,23 +6,20 @@ admission staff and admin).
 
 Routes
 ------
-POST /api/v2/auth/login               — JWT login
-POST /api/v2/register                 — disabled (503)
-POST /api/v2/auth/forgot-password     — password reset request (no debug leak)
-POST /api/v2/auth/reset-password      — consume reset token
-GET  /api/v2/profile                  — get own profile (JWT required)
-PATCH /api/v2/profile                 — update own profile (role NOT updatable)
-GET  /api/v2/applications             — list own applications
-POST /api/v2/applications             — submit application
+POST  /api/v2/auth/login      — JWT login
+POST  /api/v2/register        — disabled (503)
+GET   /api/v2/profile         — get own profile (JWT required)
+PATCH /api/v2/profile         — update own profile (role NOT updatable)
+GET   /api/v2/applications    — list own applications
+POST  /api/v2/applications    — submit application
 """
-from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity, get_jwt
 )
 
 from ..extensions import db, bcrypt, limiter
-from ..models     import User, Application, PasswordReset
+from ..models     import User, Application
 
 api_v2_bp = Blueprint("api_v2", __name__)
 
@@ -118,71 +115,6 @@ def register():
                    "You will receive an email once your account is approved.",
         "ref_no": app_entry.ref_no,
     }), 201
-
-
-# ---------------------------------------------------------------------------
-# Forgot password (v2 — hardened: no debug leak)
-# ---------------------------------------------------------------------------
-@api_v2_bp.route("/auth/forgot-password", methods=["POST"])
-@limiter.limit("5 per minute")
-def forgot_password():
-    data  = request.get_json(silent=True) or {}
-    email = (data.get("email") or "").strip().lower()
-
-    if not email:
-        return jsonify({"error": "email is required"}), 400
-
-    user = User.query.filter_by(email=email, is_active=True).first()
-    if user:
-        PasswordReset.query.filter_by(user_id=user.id, used=False).delete()
-        reset = PasswordReset(
-            user_id=user.id,
-            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
-        )
-        db.session.add(reset)
-        db.session.commit()
-        # Token is emailed only — not returned in response.
-
-    return jsonify({
-        "message": "If an account with that email exists, a password reset link has been sent."
-    }), 200
-
-
-# ---------------------------------------------------------------------------
-# Reset password (v2)
-# ---------------------------------------------------------------------------
-@api_v2_bp.route("/auth/reset-password", methods=["POST"])
-def reset_password():
-    data         = request.get_json(silent=True) or {}
-    token        = (data.get("token") or "").strip()
-    new_password = data.get("password") or ""
-
-    if not token or not new_password:
-        return jsonify({"error": "token and password are required"}), 400
-
-    if len(new_password) < 8:
-        return jsonify({"error": "Password must be at least 8 characters"}), 400
-
-    now   = datetime.now(timezone.utc)
-    reset = PasswordReset.query.filter_by(token=token, used=False).first()
-
-    if not reset:
-        return jsonify({"error": "Invalid or expired reset token"}), 400
-
-    exp = reset.expires_at
-    if exp.tzinfo is None:
-        exp = exp.replace(tzinfo=timezone.utc)
-    if now > exp:
-        return jsonify({"error": "Reset token has expired"}), 400
-
-    user = User.query.get(reset.user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
-    reset.used = True
-    db.session.commit()
-    return jsonify({"message": "Password updated successfully."}), 200
 
 
 # ---------------------------------------------------------------------------

@@ -6,8 +6,6 @@ Routes
 POST  /admin/api/v1/register              — create account
 PATCH /admin/api/v1/profile               — update profile
 POST  /admin/api/v1/auth/login            — JWT login
-POST  /admin/api/v1/auth/forgot-password  — reset request
-POST  /admin/api/v1/auth/reset-password   — consume reset token
 POST  /admin/api/v1/academy/users         — provision Academy student (admin JWT)
 GET   /admin/api/v1/applicants            — list applicants (admin/staff JWT)
 """
@@ -19,7 +17,7 @@ from flask_jwt_extended import (
 )
 
 from ..extensions import db, bcrypt, limiter
-from ..models     import User, PasswordReset, VALID_ROLES
+from ..models     import User, VALID_ROLES
 
 api_v1_bp = Blueprint("api_v1", __name__)
 
@@ -111,90 +109,6 @@ def v1_login():
         additional_claims={"role": user.role, "uuid": user.uuid}
     )
     return jsonify({"access_token": token, "role": user.role}), 200
-
-
-@api_v1_bp.route("/auth/forgot-password", methods=["POST"])
-@limiter.limit("5 per minute")
-def v1_forgot_password():
-    data  = request.get_json(silent=True) or {}
-    email = (data.get("email") or "").strip().lower()
-
-    if not email:
-        return jsonify({"error": "email is required"}), 400
-
-    user = User.query.filter_by(email=email, is_active=True).first()
-
-    if user:
-        PasswordReset.query.filter_by(user_id=user.id, used=False).delete()
-        reset = PasswordReset(
-            user_id=user.id,
-            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
-        )
-        db.session.add(reset)
-        db.session.commit()
-
-        return jsonify({
-            "message": "If an account with that email exists, a password reset link has been sent.",
-            "debug_info": {
-                "debug_token": reset.token,
-                "expires_at":  reset.expires_at.isoformat(),
-                "note":        "TODO: remove before prod — @rdelacruz",
-            }
-        }), 200
-
-    return jsonify({
-        "message": "If an account with that email exists, a password reset link has been sent."
-    }), 200
-
-
-# ---------------------------------------------------------------------------
-# Reset password
-# ---------------------------------------------------------------------------
-@api_v1_bp.route("/auth/reset-password", methods=["POST"])
-def v1_reset_password():
-    data         = request.get_json(silent=True) or {}
-    token        = (data.get("token") or "").strip()
-    new_password = data.get("password") or ""
-
-    if not token or not new_password:
-        return jsonify({"error": "token and password are required"}), 400
-
-    if len(new_password) < 8:
-        return jsonify({"error": "Password must be at least 8 characters"}), 400
-
-    now   = datetime.now(timezone.utc)
-    reset = PasswordReset.query.filter_by(token=token, used=False).first()
-
-    if not reset:
-        return jsonify({"error": "Invalid or expired reset token"}), 400
-
-    exp = reset.expires_at
-    if exp.tzinfo is None:
-        exp = exp.replace(tzinfo=timezone.utc)
-    if now > exp:
-        return jsonify({"error": "Reset token has expired"}), 400
-
-    user = User.query.get(reset.user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    user.password_hash = bcrypt.generate_password_hash(new_password).decode("utf-8")
-    reset.used = True
-    db.session.commit()
-
-    # Sync to Academy for IT staff — shared identity
-    if user.role == "it_staff":
-        try:
-            requests.post(
-                f"{ACADEMY_BASE}/internal/sync-password",
-                json={"email": user.email, "password": new_password},
-                timeout=3,
-                headers={"X-Internal-Token": current_app.config["SECRET_KEY"]},
-            )
-        except Exception:
-            pass
-
-    return jsonify({"message": "Password updated successfully."}), 200
 
 
 # ---------------------------------------------------------------------------
