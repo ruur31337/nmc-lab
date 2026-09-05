@@ -9,11 +9,12 @@ packer {
 
 # ── variables ──────────────────────────────────────────────────────────────────
 
-variable "vm_name"   { default = "NorthernMetroCollege-Lab" }
-variable "disk_size" { default = 30000 }   # MB
-variable "memory"    { default = 4096 }    # MB
-variable "cpus"      { default = 2 }
-variable "lab_ip"    { default = "192.168.111.101" }   # host-only IP (VMnet1)
+variable "vm_name"      { default = "NorthernMetroCollege-Lab" }
+variable "disk_size"   { default = 30000 }   # MB
+variable "memory"      { default = 4096 }    # MB
+variable "cpus"        { default = 2 }
+variable "lab_ip"      { default = "192.168.111.101" }   # host-only IP (VMnet1)
+variable "github_token" { default = "" }     # pass via -var or PKR_VAR_github_token
 
 # ── source ─────────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ build {
   provisioner "shell" {
     environment_vars = [
       "LAB_IP=${var.lab_ip}",
+      "GITHUB_TOKEN=${var.github_token}",
     ]
     script          = "scripts/setup.sh"
     execute_command = "echo 'lab' | sudo -S bash '{{.Path}}'"
