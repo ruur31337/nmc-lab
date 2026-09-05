@@ -1,12 +1,12 @@
 "use strict";
 const express  = require("express");
 const Database = require("better-sqlite3");
-const { DB_PATH } = require("../db/init");
-const { verifyToken, requireRole } = require("../middleware/auth");
+const { DB_PATH } = require("../../db/init");
+const { verifyToken, requireRole } = require("../../middleware/auth");
 
 const router = express.Router();
 
-// GET /api/users/me — own profile
+// GET /api/v2/users/me — own profile
 router.get("/me", verifyToken, (req, res) => {
   const db   = new Database(DB_PATH, { readonly: true });
   const user = db.prepare(`
@@ -26,10 +26,13 @@ router.get("/me", verifyToken, (req, res) => {
   res.json({ user, courses });
 });
 
-// GET /api/users/profile?user_id=1 — IDOR: no ownership check
+// GET /api/v2/users/profile?user_id= — ownership enforced
 router.get("/profile", verifyToken, (req, res) => {
   const id = req.query.user_id;
   if (!id) return res.status(400).json({ error: "user_id required" });
+  if (parseInt(id) !== req.user.sub) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const db   = new Database(DB_PATH, { readonly: true });
   const user = db.prepare(`
     SELECT id,uuid,email,first_name,last_name,role,student_id,department,created_at
@@ -40,7 +43,12 @@ router.get("/profile", verifyToken, (req, res) => {
   res.json({ user });
 });
 
+// GET /api/v2/users/:id — ownership enforced (admin/it_staff can view all)
 router.get("/:id", verifyToken, (req, res) => {
+  if (parseInt(req.params.id) !== req.user.sub &&
+      !["admin", "it_staff"].includes(req.user.role)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const db   = new Database(DB_PATH, { readonly: true });
   const user = db.prepare(`
     SELECT id,uuid,email,first_name,last_name,role,student_id,department,created_at
@@ -51,7 +59,7 @@ router.get("/:id", verifyToken, (req, res) => {
   res.json({ user });
 });
 
-// GET /api/users — admin only
+// GET /api/v2/users — admin only
 router.get("/", verifyToken, requireRole("admin", "it_staff"), (req, res) => {
   const db   = new Database(DB_PATH, { readonly: true });
   const rows = db.prepare(`

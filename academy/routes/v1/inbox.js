@@ -8,8 +8,6 @@ const { verifyToken } = require("../../middleware/auth");
 
 const router = express.Router();
 
-// GET /api/v1/inbox — list inbox messages
-// Legacy endpoint — returns all messages without recipient filter
 router.get("/", verifyToken, (req, res) => {
   const db   = new Database(DB_PATH, { readonly: true });
   const rows = db.prepare(`
@@ -22,7 +20,6 @@ router.get("/", verifyToken, (req, res) => {
   res.json({ messages: rows });
 });
 
-// GET /api/v1/inbox/download/:filename — download attachment (authenticated only)
 router.get("/download/:filename", verifyToken, (req, res) => {
   const db     = new Database(DB_PATH, { readonly: true });
   const exists = db.prepare(
@@ -39,7 +36,6 @@ router.get("/download/:filename", verifyToken, (req, res) => {
   res.download(filePath, req.params.filename);
 });
 
-// GET /api/v1/inbox/:id — read single message (no ownership check)
 router.get("/:id", verifyToken, (req, res) => {
   const db  = new Database(DB_PATH);
   const msg = db.prepare(

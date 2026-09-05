@@ -17,12 +17,12 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 app.use("/api/auth",          require("./routes/auth"));
 app.use("/api/announcements", require("./routes/announcements"));
 app.use("/api/users",         require("./routes/photos"));   // photo upload/serve (mounted first — specific paths)
-app.use("/api/users",         require("./routes/users"));
 app.use("/api/courses",       require("./routes/courses"));
 
-// Inbox — v1 (legacy) and v2 (current)
-app.use("/api/v1/inbox",      require("./routes/v1/inbox"));
+app.use("/api/v2/users",      require("./routes/v2/users"));
+app.use("/api/v1/users",      require("./routes/v1/users"));
 app.use("/api/v2/inbox",      require("./routes/v2/inbox"));
+app.use("/api/v1/inbox",      require("./routes/v1/inbox"));
 
 // ── Internal routes (X-Internal-Token required) ─────────────────────────────
 app.use("/internal",          require("./routes/internal"));
