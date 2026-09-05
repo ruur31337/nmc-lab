@@ -29,8 +29,9 @@ source "vmware-iso" "nmc_lab" {
   iso_url      = "file:///C:/Users/Leonel Obina/Documents/nmc-lab/build/ubuntu-22.04.5-live-server-amd64.iso"
   iso_checksum = "none"
 
-  http_directory = "http"
-  boot_wait      = "5s"
+  http_directory    = "http"
+  http_bind_address = "0.0.0.0"
+  boot_wait         = "10s"
   boot_command   = [
     "c<wait>",
     "linux /casper/vmlinuz --- autoinstall ds='nocloud-net;seedfrom=http://{{.HTTPIP}}:{{.HTTPPort}}/'<enter><wait>",
