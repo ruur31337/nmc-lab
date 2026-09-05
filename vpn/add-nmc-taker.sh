@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Northern Metro College Pentest Lab — add an exam taker
+# Northern Metro College Pentest Lab — add an exam taker (per-taker stack)
 # Usage: bash add-nmc-taker.sh <name>
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -11,8 +11,14 @@ if [[ -z "$NAME" ]]; then
   exit 1
 fi
 
+if [[ ! "$NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+  echo "[add-nmc-taker] ERROR: invalid name '$NAME'. Letters, numbers, hyphens, underscores only."
+  exit 1
+fi
+
 VPN_DIR="/opt/vpn-nmc"
 EASYRSA_DIR="/opt/easyrsa-nmc"
+LAB_DIR="/opt/nmc-lab"
 TAKER_DIR="$VPN_DIR/takers/$NAME"
 SERVER_IP=$(curl -4 -s ifconfig.me)
 
@@ -21,19 +27,22 @@ if [[ -d "$TAKER_DIR" ]]; then
   exit 1
 fi
 
-# ── Assign VPN IP ─────────────────────────────────────────────────────────────
+# ── Assign index, VPN IP, and lab port ───────────────────────────────────────
 IDX=$(cat "$VPN_DIR/takers/.next-index")
 echo $((IDX + 1)) > "$VPN_DIR/takers/.next-index"
 
 VPN_IP="10.9.0.$((IDX * 4 + 2))"
 VPN_PEER="10.9.0.$((IDX * 4 + 1))"
+LAB_PORT=$((9200 + IDX))
 
 mkdir -p "$TAKER_DIR"
-echo "$VPN_IP"  > "$TAKER_DIR/vpn-ip"
+echo "$VPN_IP"   > "$TAKER_DIR/vpn-ip"
 echo "$VPN_PEER" > "$TAKER_DIR/vpn-peer"
+echo "$LAB_PORT" > "$TAKER_DIR/lab-port"
 
-echo "[add-nmc-taker] Name:   $NAME"
-echo "[add-nmc-taker] VPN IP: $VPN_IP (peer: $VPN_PEER)"
+echo "[add-nmc-taker] Name:    $NAME"
+echo "[add-nmc-taker] VPN IP:  $VPN_IP (peer: $VPN_PEER)"
+echo "[add-nmc-taker] Port:    $LAB_PORT"
 
 # ── Generate client cert ──────────────────────────────────────────────────────
 cd "$EASYRSA_DIR"
@@ -76,6 +85,35 @@ $(cat "$EASYRSA_DIR/pki/private/$NAME.key")
 $(cat "$EASYRSA_DIR/pki/ta.key")
 </tls-auth>
 OVPNEOF
+
+# ── Start per-taker NMC lab stack ─────────────────────────────────────────────
+echo "[add-nmc-taker] Starting NMC lab stack for $NAME on port $LAB_PORT..."
+cd "$LAB_DIR"
+
+# Start DB + app containers first (no nginx yet — nginx depends on all being ready)
+LAB_PORT=$LAB_PORT docker compose -f "$LAB_DIR/docker-compose.yml" -p "$NAME" \
+  up -d --no-deps registrar-db academy admission main-web
+
+# Wait for registrar-db to be healthy before starting registrar + nginx
+echo "[add-nmc-taker] Waiting for registrar-db to be healthy..."
+for i in $(seq 1 24); do
+  STATUS=$(docker inspect --format='{{.State.Health.Status}}' "${NAME}-registrar-db-1" 2>/dev/null || echo "missing")
+  if [[ "$STATUS" == "healthy" ]]; then
+    echo "[add-nmc-taker] registrar-db is healthy."
+    break
+  fi
+  echo "[add-nmc-taker] ($i/24) registrar-db status: $STATUS — waiting 5s..."
+  sleep 5
+done
+
+# Bring up everything (registrar, registrar-bot, nginx)
+LAB_PORT=$LAB_PORT docker compose -f "$LAB_DIR/docker-compose.yml" -p "$NAME" up -d
+echo "[add-nmc-taker] Stack started."
+
+# ── iptables: route taker VPN IP:80 → their lab port ─────────────────────────
+iptables -t nat -I PREROUTING 1 -i tun1 -s "$VPN_IP" -p tcp --dport 80 -j REDIRECT --to-ports "$LAB_PORT"
+iptables-save > /etc/iptables/rules.v4
+echo "[add-nmc-taker] iptables: $VPN_IP:80 → localhost:$LAB_PORT"
 
 echo ""
 echo "══════════════════════════════════════════════════════"

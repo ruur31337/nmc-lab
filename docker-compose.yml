@@ -1,11 +1,10 @@
 services:
 
-  # ── Reverse proxy — routes all NMC domains on port 80
+  # ── Reverse proxy — routes all NMC domains on ${LAB_PORT:-9100}
   nginx:
     image: ruur1337/nmc-nginx:latest
-    container_name: nmc-nginx
     ports:
-      - "9100:80"
+      - "${LAB_PORT:-9100}:80"
     depends_on:
       - main-web
       - academy
@@ -19,7 +18,6 @@ services:
   main-web:
     build: ./main-web
     image: ruur1337/nmc-main-web:latest
-    container_name: nmc-main-web
     networks:
       - nmc-school
     restart: unless-stopped
@@ -28,7 +26,6 @@ services:
   academy:
     build: ./academy
     image: ruur1337/nmc-academy:latest
-    container_name: nmc-academy
     networks:
       - nmc-school
     restart: unless-stopped
@@ -36,7 +33,6 @@ services:
   # ── App 3: admission.nmc.local (admission portal — Flask)
   admission:
     image: ruur1337/nmc-admission:latest
-    container_name: nmc-admission
     networks:
       - nmc-school
     restart: unless-stopped
@@ -44,7 +40,6 @@ services:
   # ── App 4: registrar.nmc.local (registrar system — Apache/PHP)
   registrar:
     image: ruur1337/nmc-registrar:latest
-    container_name: nmc-registrar
     networks:
       - nmc-school
     depends_on:
@@ -55,7 +50,6 @@ services:
   # ── Registrar database — MySQL 8 (pre-seeded)
   registrar-db:
     image: ruur1337/nmc-registrar-db:latest
-    container_name: nmc-registrar-db
     environment:
       MYSQL_ROOT_PASSWORD: nmcroot2025
       MYSQL_DATABASE: nmc_registrar
@@ -71,9 +65,8 @@ services:
   # ── Registrar staff bot — simulates staff reviewing pending requests
   registrar-bot:
     image: ruur1337/nmc-registrar-bot:latest
-    container_name: nmc-registrar-bot
     environment:
-      REGISTRAR_URL: http://nmc-registrar:80
+      REGISTRAR_URL: http://registrar:80
       BOT_USER: acruz
       BOT_PASS: staff2025
       BOT_INTERVAL: "45000"
