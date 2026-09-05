@@ -1,0 +1,246 @@
+/* NMC Main Website Stylesheet
+   Last updated: Jan 2024  - rdelacruz
+   TODO: fix mobile nav, broken on Samsung browsers
+*/
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: #333333;
+  background: #fff;
+}
+
+a { color: #6B0F1A; text-decoration:none; }
+a:hover { text-decoration: underline; }
+
+/* ---- topbar ---- */
+.topbar {
+  background: #6B0F1A;
+  color: #fff;
+  font-size:12px;
+  padding: 5px 0;
+}
+.topbar-inner {
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  justify-content:space-between;
+}
+.topbar a { color:#e8c97a; font-size:12px; }
+
+/* ---- header ---- */
+#header {
+  background: #fff;
+  border-bottom: 3px solid #6B0F1A;
+  padding: 14px 0;
+}
+#header .inner {
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.site-logo { display:flex; align-items:center; gap:14px; }
+.site-logo img { width:64px; height:64px; }
+.logo-text h1 {
+  font-size:20px;
+  font-weight:bold;
+  color: #6B0F1A;
+  letter-spacing:.5px;
+}
+.logo-text p {
+  font-size:11px;
+  color:#888;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+/* ---- nav ---- */
+#main-nav {
+  background: #6B0F1A;
+}
+#main-nav ul {
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 20px;
+  list-style:none;
+  display:flex;
+}
+#main-nav ul li a {
+  display:block;
+  color:#fff;
+  padding:11px 16px;
+  font-size:13px;
+  font-weight:bold;
+}
+#main-nav ul li a:hover {
+  background: #8a1520;
+  text-decoration:none;
+}
+#main-nav ul li.active a {
+  background: #C9961A;
+  color: #fff;
+}
+
+/* ---- hero banner ---- */
+.hero {
+  background: #6B0F1A url('../images/campus-banner.jpg') center/cover no-repeat;
+  color:#fff;
+  padding:60px 20px;
+  text-align:center;
+  position:relative;
+}
+.hero::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(107,15,26,.65);
+}
+.hero-content { position:relative; z-index:1; }
+.hero h2 {
+  font-size:32px;
+  margin-bottom:10px;
+  text-shadow:0 2px 6px rgba(0,0,0,.4);
+}
+.hero p { font-size:15px; opacity:.9; margin-bottom:20px; }
+.hero-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.btn-hero {
+  display:inline-block;
+  padding:10px 28px;
+  border-radius:3px;
+  font-size:14px;
+  font-weight:bold;
+}
+.btn-primary-hero { background:#C9961A; color:#fff; }
+.btn-outline-hero { background:transparent; border:2px solid #fff; color:#fff; }
+.btn-hero:hover { opacity:.88; text-decoration:none; }
+
+/* ---- page wrapper ---- */
+.page-wrap {
+  max-width:1100px;
+  margin:0 auto;
+  padding:30px 20px;
+}
+
+/* ---- two-col ---- */
+.two-col { display:flex; gap:30px; }
+.two-col .main-col { flex:1; }
+.two-col .side-col { width:280px; flex-shrink:0; }
+
+/* ---- section headings ---- */
+.section-title {
+  font-size:18px;
+  color:#6B0F1A;
+  border-bottom:2px solid #6B0F1A;
+  padding-bottom:6px;
+  margin-bottom:16px;
+}
+
+/* ---- news items ---- */
+.news-item { border-bottom:1px solid #e0e0e0; padding:14px 0; }
+.news-item:last-child { border-bottom:none; }
+.news-date { font-size:11px; color:#888; margin-bottom:3px; }
+.news-item h3 { font-size:14px; margin-bottom:4px; }
+.news-item h3 a { color:#333; }
+.news-item h3 a:hover { color:#6B0F1A; }
+.news-item p { font-size:13px; color:#666; line-height:1.5; }
+
+/* ---- quick links sidebar ---- */
+.quick-links { background:#f5f5f5; border:1px solid #ddd; padding:16px; margin-bottom:20px; }
+.quick-links h3 { font-size:14px; font-weight:bold; color:#6B0F1A; margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:6px; }
+.quick-links ul { list-style:none; }
+.quick-links ul li { padding:5px 0; border-bottom:1px dotted #ddd; }
+.quick-links ul li a { font-size:13px; }
+.quick-links ul li a:before { content:"› "; color:#C9961A; }
+
+/* ---- announcements box ---- */
+.ann-box { background:#fffbe6; border:1px solid #e8c97a; padding:14px; margin-bottom:20px; }
+.ann-box h3 { font-size:13px; font-weight:bold; color:#7a5c00; margin-bottom:8px; }
+.ann-box ul { list-style:none; }
+.ann-box ul li { font-size:12px; padding:3px 0; border-bottom:1px dotted #e8c97a; }
+.ann-box ul li a { color:#7a5c00; }
+
+/* ---- programs table ---- */
+/* old layout, keep for now - RD */
+.programs-table { width:100%; border-collapse:collapse; margin-top:16px; }
+.programs-table th { background:#6B0F1A; color:#fff; padding:8px 12px; font-size:13px; text-align:left; }
+.programs-table td { padding:8px 12px; font-size:13px; border-bottom:1px solid #eee; }
+.programs-table tr:nth-child(even) td { background:#f9f9f9; }
+
+/* ---- contact / careers form ---- */
+.form-section { max-width:680px; }
+.form-row { margin-bottom:14px; }
+.form-row label { display:block; font-size:13px; font-weight:bold; margin-bottom:4px; color:#444; }
+.form-row input[type=text],
+.form-row input[type=email],
+.form-row input[type=file],
+.form-row select,
+.form-row textarea {
+  width:100%;
+  padding:8px 10px;
+  border:1px solid #ccc;
+  font-size:13px;
+  font-family:Arial,sans-serif;
+  border-radius:2px;
+}
+.form-row textarea { height:100px; resize:vertical; }
+.btn-submit {
+  background:#6B0F1A;
+  color:#fff;
+  border:none;
+  padding:9px 28px;
+  font-size:13px;
+  font-weight:bold;
+  cursor:pointer;
+  border-radius:2px;
+}
+.btn-submit:hover { background:#8a1520; }
+.form-note { font-size:11px; color:#888; margin-top:4px; }
+
+/* ---- alert boxes ---- */
+.alert { padding:10px 14px; margin:12px 0; font-size:13px; border-radius:2px; }
+.alert-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+.alert-error   { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+
+/* ---- footer ---- */
+#footer {
+  background: #2a2a2a;
+  color:#ccc;
+  font-size:12px;
+  padding:28px 0 16px;
+  margin-top:40px;
+}
+#footer .footer-inner {
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  gap:40px;
+  flex-wrap:wrap;
+}
+#footer h4 { color:#fff; font-size:13px; margin-bottom:10px; }
+#footer ul { list-style:none; }
+#footer ul li { padding:2px 0; }
+#footer ul li a { color:#aaa; font-size:12px; }
+#footer ul li a:hover { color:#fff; }
+.footer-copy {
+  text-align:center;
+  border-top:1px solid #444;
+  margin-top:20px;
+  padding-top:12px;
+  color:#777;
+  font-size:11px;
+}
+
+/* breadcrumb */
+.breadcrumb { font-size:12px; color:#888; margin-bottom:18px; }
+.breadcrumb a { color:#6B0F1A; }
+.breadcrumb span { margin:0 5px; }
+
+/* page subtitle */
+.page-intro { font-size:13px; color:#555; line-height:1.7; margin-bottom:20px; }

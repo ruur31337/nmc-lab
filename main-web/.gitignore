@@ -1,0 +1,5 @@
+node_modules/
+northstar.db
+*.db-shm
+*.db-wal
+.merchant-token
