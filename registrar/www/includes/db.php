@@ -7,7 +7,7 @@
  * @author  rdelacruz (IT dept)
  */
 
-$db_host = getenv('DB_HOST') ?: 'nmc-registrar-db';
+$db_host = getenv('DB_HOST') ?: 'registrar-db';
 $db_user = getenv('DB_USER') ?: 'reguser';
 $db_pass = getenv('DB_PASS') ?: 'regpass2025';
 $db_name = getenv('DB_NAME') ?: 'nmc_registrar';

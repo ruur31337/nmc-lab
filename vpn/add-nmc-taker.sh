@@ -112,8 +112,10 @@ echo "[add-nmc-taker] Stack started."
 
 # ── iptables: route taker VPN IP:80 → their lab port ─────────────────────────
 iptables -t nat -I PREROUTING 1 -i tun1 -s "$VPN_IP" -p tcp --dport 80 -j REDIRECT --to-ports "$LAB_PORT"
+# REDIRECT sends packets to INPUT — must explicitly allow the lab port
+iptables -I INPUT -i tun1 -s "$VPN_IP" -p tcp --dport "$LAB_PORT" -j ACCEPT
 iptables-save > /etc/iptables/rules.v4
-echo "[add-nmc-taker] iptables: $VPN_IP:80 → localhost:$LAB_PORT"
+echo "[add-nmc-taker] iptables: $VPN_IP:80 → localhost:$LAB_PORT (INPUT ACCEPT added)"
 
 echo ""
 echo "══════════════════════════════════════════════════════"
