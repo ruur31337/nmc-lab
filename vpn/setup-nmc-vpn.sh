@@ -75,17 +75,17 @@ mkdir -p /var/log/openvpn
 echo 1 > /proc/sys/net/ipv4/ip_forward
 sysctl -p /etc/sysctl.d/99-openvpn.conf 2>/dev/null || true
 
-# ── 5. Firewall ───────────────────────────────────────────────────────────────
-ufw allow $VPN_PORT/udp
+# ── 5. Firewall (iptables only — no ufw) ─────────────────────────────────────
+# Allow OpenVPN port
+iptables -I INPUT -p udp --dport $VPN_PORT -j ACCEPT
 
-# Allow NMC lab port from VPN only
-ufw allow in on tun1 to any port $NMC_LAB_PORT proto tcp
+# Allow NMC lab port from VPN subnet only
+iptables -I INPUT -i tun1 -p tcp --dport $NMC_LAB_PORT -j ACCEPT
 
-ufw --force enable
-
-# iptables: masquerade NMC VPN traffic
+# Masquerade NMC VPN traffic
 iptables -t nat -A POSTROUTING -s 10.9.0.0/24 -j MASQUERADE
-netfilter-persistent save
+
+netfilter-persistent save 2>/dev/null || iptables-save > /etc/iptables/rules.v4
 
 # ── 6. State directory ────────────────────────────────────────────────────────
 mkdir -p "$VPN_DIR/takers"
