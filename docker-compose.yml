@@ -5,7 +5,7 @@ services:
     image: ruur1337/nmc-nginx:latest
     container_name: nmc-nginx
     ports:
-      - "8080:80"
+      - "9100:80"
     depends_on:
       - main-web
       - academy
