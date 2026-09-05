@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcement — NMC Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner"><span>Northern Metro College — NMC Academy &nbsp;·&nbsp; AY 2026–2027</span></div></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/dashboard" class="brand">
+      <svg class="brand-seal" viewBox="0 0 60 60" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="29" fill="#0F3226" stroke="#D4881A" stroke-width="2"/>
+        <text x="30" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#EBF5EE">NMC</text>
+        <text x="30" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#D4881A" letter-spacing="1">ACADEMY</text>
+      </svg>
+      <div class="brand-text">
+        <span class="portal-name">NMC Academy</span>
+        <span class="portal-sub">Student Portal</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/announcements" class="active">Announcements</a>
+      <a href="/profile">Profile</a>
+      <a href="/inbox" class="nav-inbox" id="inbox-link" style="display:none;">📥 Inbox</a>
+      <a href="#" onclick="logout();return false;" class="nav-signout">Sign out</a>
+    </nav>
+  </div>
+  <div class="header-rule"></div>
+</header>
+
+<div class="main-content">
+  <div class="ann-detail-wrap">
+    <div style="margin-bottom:16px;">
+      <a href="/announcements" style="font-size:13px;color:var(--green);font-weight:600;">&larr; Back to Announcements</a>
+    </div>
+
+    <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+    <div id="loading" class="loading">Loading…</div>
+
+    <div id="ann-content" style="display:none;">
+      <div class="ann-detail-header">
+        <div class="ann-detail-title" id="ann-title"></div>
+        <div class="ann-detail-meta">
+          <span id="ann-category"></span>
+          <span id="ann-date"></span>
+        </div>
+      </div>
+      <div class="ann-detail-body" id="ann-body"></div>
+
+      <!-- Author card — leaks IT Admin email when announcement was posted by IT staff -->
+      <div class="ann-author-card" id="author-card">
+        <div class="ann-author-avatar" id="author-initials"></div>
+        <div>
+          <div class="ann-author-name" id="author-name"></div>
+          <div class="ann-author-meta">
+            <span id="author-role"></span> &nbsp;·&nbsp; <span id="author-dept"></span>
+          </div>
+          <div class="ann-author-email" id="author-email"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <strong>Northern Metro College — NMC Academy</strong> &nbsp;·&nbsp; &copy; 2026
+</footer>
+
+<script>
+const TOKEN = localStorage.getItem('academy_token');
+const ROLE  = localStorage.getItem('academy_role');
+if (!TOKEN) window.location = '/login';
+function logout() { localStorage.clear(); window.location = '/login'; }
+function authH() { return { 'Authorization': 'Bearer ' + TOKEN }; }
+
+if (ROLE === 'it_staff' || ROLE === 'admin') {
+  document.getElementById('inbox-link').style.display = '';
+}
+
+// Extract announcement ID from URL path: /announcements/3
+const annId = window.location.pathname.split('/').filter(Boolean).pop();
+
+async function loadAnnouncement() {
+  const res  = await fetch('/api/announcements/' + annId, { headers: authH() });
+  const data = await res.json();
+  document.getElementById('loading').style.display = 'none';
+
+  if (!res.ok) {
+    document.getElementById('error-msg').textContent = data.error || 'Announcement not found.';
+    document.getElementById('error-msg').style.display = 'block';
+    return;
+  }
+
+  document.title = data.title + ' — NMC Academy';
+  document.getElementById('ann-title').textContent    = data.title;
+  document.getElementById('ann-body').textContent     = data.body;
+  document.getElementById('ann-category').textContent = data.category;
+  document.getElementById('ann-date').textContent     =
+    new Date(data.created_at).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'});
+
+  // Author card — full author object from API response (includes email)
+  const a = data.author;
+  document.getElementById('author-initials').textContent =
+    (a.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('author-name').textContent  = a.name;
+  document.getElementById('author-role').textContent  = (a.role || '').replace('_', ' ');
+  document.getElementById('author-dept').textContent  = a.department || '';
+  document.getElementById('author-email').textContent = a.email;
+
+  document.getElementById('ann-content').style.display = '';
+}
+
+loadAnnouncement();
+</script>
+</body>
+</html>

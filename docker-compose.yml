@@ -17,6 +17,7 @@ services:
 
   # ── App 1: www.nmc.local (main website — Apache/PHP)
   main-web:
+    build: ./main-web
     image: ruur1337/nmc-main-web:latest
     container_name: nmc-main-web
     networks:
@@ -25,6 +26,7 @@ services:
 
   # ── App 2: academy.nmc.local (student/faculty portal — Node.js)
   academy:
+    build: ./academy
     image: ruur1337/nmc-academy:latest
     container_name: nmc-academy
     networks:

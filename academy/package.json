@@ -1,0 +1,17 @@
+{
+  "name": "nmc-academy",
+  "version": "1.0.0",
+  "description": "NMC Academy — Student Learning Portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^9.4.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "uuid": "^9.0.0"
+  }
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inbox — NMC Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner"><span>Northern Metro College — NMC Academy &nbsp;·&nbsp; AY 2026–2027</span></div></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/dashboard" class="brand">
+      <svg class="brand-seal" viewBox="0 0 60 60" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="29" fill="#0F3226" stroke="#D4881A" stroke-width="2"/>
+        <text x="30" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#EBF5EE">NMC</text>
+        <text x="30" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#D4881A" letter-spacing="1">ACADEMY</text>
+      </svg>
+      <div class="brand-text">
+        <span class="portal-name">NMC Academy</span>
+        <span class="portal-sub">Student Portal</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/announcements">Announcements</a>
+      <a href="/profile">Profile</a>
+      <a href="/inbox" class="nav-inbox active">📥 Inbox</a>
+      <a href="#" onclick="logout();return false;" class="nav-signout">Sign out</a>
+    </nav>
+  </div>
+  <div class="header-rule"></div>
+</header>
+
+<div class="main-content">
+  <div class="portal-wrap">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="name" id="sb-name">Loading…</div>
+        <div class="role" id="sb-role"></div>
+        <div class="student-id" id="sb-sid"></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+        <a href="/announcements"><span class="icon">📢</span> Announcements</a>
+        <a href="/profile"><span class="icon">👤</span> My Profile</a>
+        <div class="sidebar-divider"></div>
+        <a href="/inbox" class="active"><span class="icon">📥</span> Inbox <span id="unread-badge" style="background:var(--amber);color:#1A0A00;border-radius:var(--r-full);font-size:10px;padding:1px 6px;font-weight:700;margin-left:4px;display:none;"></span></a>
+        <a href="#" onclick="logout();return false;"><span class="icon">🚪</span> Sign Out</a>
+      </nav>
+    </aside>
+
+    <div class="portal-main">
+      <div class="page-title">Inbox</div>
+      <p class="page-sub">System messages and notifications for your account.</p>
+
+      <!-- Message list (left) / Message detail (right) -->
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start;">
+
+        <div class="card" style="margin:0;">
+          <div class="card-header"><h2>Messages</h2></div>
+          <div class="inbox-list" id="inbox-list">
+            <div class="loading">Loading messages…</div>
+          </div>
+        </div>
+
+        <div class="card" id="message-panel" style="margin:0;display:none;">
+          <div class="card-header">
+            <h2>Message</h2>
+            <button class="btn btn-sm btn-outline" onclick="closeMessage()">✕ Close</button>
+          </div>
+          <div class="message-detail" id="message-detail"></div>
+        </div>
+
+        <div class="card" id="empty-panel" style="margin:0;">
+          <div class="empty-state">
+            <div class="icon">📧</div>
+            <p>Select a message to read</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <strong>Northern Metro College — NMC Academy</strong> &nbsp;·&nbsp; &copy; 2026
+</footer>
+
+<script>
+const TOKEN = localStorage.getItem('academy_token');
+const ROLE  = localStorage.getItem('academy_role');
+if (!TOKEN) window.location = '/login';
+function logout() { localStorage.clear(); window.location = '/login'; }
+function authH() { return { 'Authorization': 'Bearer ' + TOKEN }; }
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+}
+
+async function loadMe() {
+  const res  = await fetch('/api/auth/me', { headers: authH() });
+  const data = await res.json();
+  if (!res.ok) return;
+  const u = data.user;
+  document.getElementById('sb-name').textContent = `${u.first_name} ${u.last_name}`;
+  document.getElementById('sb-role').textContent = u.role.replace('_',' ');
+  document.getElementById('sb-sid').textContent  = u.department || '';
+}
+
+let messages = [];
+
+async function loadInbox() {
+  const res  = await fetch('/api/inbox', { headers: authH() });
+  const data = await res.json();
+  messages = data.messages || [];
+
+  const unread = messages.filter(m => !m.is_read).length;
+  if (unread) {
+    const badge = document.getElementById('unread-badge');
+    badge.textContent = unread;
+    badge.style.display = 'inline';
+  }
+
+  if (!messages.length) {
+    document.getElementById('inbox-list').innerHTML =
+      '<div class="empty-state"><div class="icon">📭</div><p>No messages yet.</p></div>';
+    return;
+  }
+
+  document.getElementById('inbox-list').innerHTML = messages.map(m => `
+    <div class="inbox-item ${m.is_read ? '' : 'unread'}" onclick="openMessage(${m.id})" id="msg-row-${m.id}">
+      <div class="inbox-dot ${m.is_read ? 'read' : ''}"></div>
+      <div class="inbox-body">
+        <div class="inbox-subject">${m.subject}</div>
+        <div class="inbox-sender">From: ${m.sender_name}</div>
+      </div>
+      <div class="inbox-meta">
+        <div>${formatDate(m.sent_at)}</div>
+        ${m.has_attachment ? '<div class="inbox-attachment">📎</div>' : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function openMessage(id) {
+  const res  = await fetch('/api/inbox/' + id, { headers: authH() });
+  const data = await res.json();
+  const msg  = data.message;
+
+  // Update row to read
+  const row = document.getElementById('msg-row-' + id);
+  if (row) { row.classList.remove('unread'); row.querySelector('.inbox-dot').classList.add('read'); }
+
+  let attachHTML = '';
+  if (msg.attachment) {
+    attachHTML = `
+      <div class="message-attachment" onclick="downloadAttachment('${msg.attachment}')">
+        📎 ${msg.attachment}
+        <span style="font-size:11px;font-weight:400;opacity:.75;margin-left:4px;">Click to download</span>
+      </div>`;
+  }
+
+  document.getElementById('message-detail').innerHTML = `
+    <div class="message-header">
+      <div class="message-subject">${msg.subject}</div>
+      <div class="message-from">From: <strong>${msg.sender_name}</strong> &nbsp;·&nbsp; ${formatDate(msg.sent_at)}</div>
+    </div>
+    <div class="message-body">${msg.body}</div>
+    ${attachHTML}
+  `;
+
+  document.getElementById('empty-panel').style.display  = 'none';
+  document.getElementById('message-panel').style.display = '';
+}
+
+function closeMessage() {
+  document.getElementById('message-panel').style.display = 'none';
+  document.getElementById('empty-panel').style.display   = '';
+}
+
+async function downloadAttachment(filename) {
+  window.location = '/api/inbox/download/' + encodeURIComponent(filename);
+}
+
+loadMe();
+loadInbox();
+</script>
+</body>
+</html>

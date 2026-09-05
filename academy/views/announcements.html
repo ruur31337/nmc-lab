@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcements — NMC Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner"><span>Northern Metro College — NMC Academy &nbsp;·&nbsp; AY 2026–2027</span></div></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/dashboard" class="brand">
+      <svg class="brand-seal" viewBox="0 0 60 60" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="29" fill="#0F3226" stroke="#D4881A" stroke-width="2"/>
+        <text x="30" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#EBF5EE">NMC</text>
+        <text x="30" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#D4881A" letter-spacing="1">ACADEMY</text>
+      </svg>
+      <div class="brand-text">
+        <span class="portal-name">NMC Academy</span>
+        <span class="portal-sub">Student Portal</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/announcements" class="active">Announcements</a>
+      <a href="/profile">Profile</a>
+      <a href="/inbox" class="nav-inbox" id="inbox-link" style="display:none;">📥 Inbox</a>
+      <a href="#" onclick="logout();return false;" class="nav-signout">Sign out</a>
+    </nav>
+  </div>
+  <div class="header-rule"></div>
+</header>
+
+<div class="main-content">
+  <div class="portal-wrap">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="name" id="sb-name">Loading…</div>
+        <div class="role" id="sb-role"></div>
+        <div class="student-id" id="sb-sid"></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+        <a href="/announcements" class="active"><span class="icon">📢</span> Announcements</a>
+        <a href="/profile"><span class="icon">👤</span> My Profile</a>
+        <div class="sidebar-divider"></div>
+        <a href="/inbox" id="sidebar-inbox" style="display:none;"><span class="icon">📥</span> Inbox</a>
+        <a href="#" onclick="logout();return false;"><span class="icon">🚪</span> Sign Out</a>
+      </nav>
+    </aside>
+
+    <div class="portal-main">
+      <div class="page-title">Announcements</div>
+      <p class="page-sub">Official notices from the NMC administration and faculty.</p>
+
+      <div class="card">
+        <div class="ann-list" id="ann-list">
+          <div class="loading">Loading announcements…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <strong>Northern Metro College — NMC Academy</strong> &nbsp;·&nbsp; &copy; 2026
+</footer>
+
+<script>
+const TOKEN = localStorage.getItem('academy_token');
+const ROLE  = localStorage.getItem('academy_role');
+const NAME  = localStorage.getItem('academy_name');
+if (!TOKEN) window.location = '/login';
+function logout() { localStorage.clear(); window.location = '/login'; }
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+}
+function authH() { return { 'Authorization': 'Bearer ' + TOKEN }; }
+
+if (ROLE === 'it_staff' || ROLE === 'admin') {
+  document.getElementById('inbox-link').style.display = '';
+  document.getElementById('sidebar-inbox').style.display = '';
+}
+
+async function loadMe() {
+  const res  = await fetch('/api/auth/me', { headers: authH() });
+  const data = await res.json();
+  if (!res.ok) return;
+  const u = data.user;
+  document.getElementById('sb-name').textContent = `${u.first_name} ${u.last_name}`;
+  document.getElementById('sb-role').textContent = u.role.replace('_',' ');
+  document.getElementById('sb-sid').textContent  = u.student_id ? `ID: ${u.student_id}` : u.department || '';
+}
+
+async function loadAnnouncements() {
+  const res  = await fetch('/api/announcements', { headers: authH() });
+  const data = await res.json();
+  const list = data.announcements || [];
+
+  if (!list.length) {
+    document.getElementById('ann-list').innerHTML =
+      '<div class="empty-state"><div class="icon">📢</div><p>No announcements at this time.</p></div>';
+    return;
+  }
+
+  document.getElementById('ann-list').innerHTML = list.map(a => `
+    <a class="ann-item" href="/announcements/${a.id}">
+      <span class="ann-pin">${a.pinned ? '📌' : '&nbsp;&nbsp;'}</span>
+      <div class="ann-content">
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-meta">Posted by ${a.author_name} &nbsp;·&nbsp; ${formatDate(a.created_at)}</div>
+      </div>
+      <span class="ann-badge ${a.category === 'system' ? 'system' : a.category === 'academic' ? 'academic' : ''}">${a.category}</span>
+    </a>
+  `).join('');
+}
+
+loadMe();
+loadAnnouncements();
+</script>
+</body>
+</html>

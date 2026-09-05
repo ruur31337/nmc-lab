@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — NMC Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner"><span>Northern Metro College — NMC Academy &nbsp;·&nbsp; AY 2026–2027</span></div></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/dashboard" class="brand">
+      <svg class="brand-seal" viewBox="0 0 60 60" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="29" fill="#0F3226" stroke="#D4881A" stroke-width="2"/>
+        <text x="30" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#EBF5EE">NMC</text>
+        <text x="30" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#D4881A" letter-spacing="1">ACADEMY</text>
+      </svg>
+      <div class="brand-text">
+        <span class="portal-name">NMC Academy</span>
+        <span class="portal-sub">Student Portal</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/announcements">Announcements</a>
+      <a href="/profile" class="active">Profile</a>
+      <a href="/inbox" class="nav-inbox" id="inbox-link" style="display:none;">📥 Inbox</a>
+      <a href="#" onclick="logout();return false;" class="nav-signout">Sign out</a>
+    </nav>
+  </div>
+  <div class="header-rule"></div>
+</header>
+
+<div class="main-content">
+  <div class="portal-wrap">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="name" id="sb-name">Loading…</div>
+        <div class="role" id="sb-role"></div>
+        <div class="student-id" id="sb-sid"></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard"><span class="icon">🏠</span> Dashboard</a>
+        <a href="/announcements"><span class="icon">📢</span> Announcements</a>
+        <a href="/profile" class="active"><span class="icon">👤</span> My Profile</a>
+        <div class="sidebar-divider"></div>
+        <a href="/inbox" id="sidebar-inbox" style="display:none;"><span class="icon">📥</span> Inbox</a>
+        <a href="#" onclick="logout();return false;"><span class="icon">🚪</span> Sign Out</a>
+      </nav>
+    </aside>
+
+    <div class="portal-main">
+      <div class="page-title">My Profile</div>
+      <p class="page-sub">Your student account information.</p>
+
+      <div id="loading" class="loading">Loading profile…</div>
+
+      <div class="card" id="profile-card" style="display:none;">
+        <div class="card-header"><h2>Account Details</h2></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">
+            <!-- Avatar with click-to-upload -->
+            <div style="position:relative;flex-shrink:0;">
+              <div id="avatar-wrap" style="width:84px;height:84px;border-radius:50%;overflow:hidden;border:3px solid var(--green);cursor:pointer;" onclick="document.getElementById('photo-input').click()" title="Change photo">
+                <div id="avatar-initials" style="width:100%;height:100%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:28px;font-weight:700;"></div>
+                <img id="avatar-img" src="" alt="Profile photo" style="display:none;width:100%;height:100%;object-fit:cover;">
+              </div>
+              <button onclick="document.getElementById('photo-input').click()" title="Upload photo"
+                style="position:absolute;bottom:0;right:0;width:26px;height:26px;background:var(--amber);border:2px solid var(--bg-card);border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0;">📷</button>
+              <input type="file" id="photo-input" accept="image/jpeg,image/png" style="display:none;">
+              <div id="photo-status" style="font-size:10px;color:var(--text-muted);text-align:center;margin-top:4px;width:84px;line-height:1.3;"></div>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:700;font-family:'Lora',serif;color:var(--text);" id="full-name"></div>
+              <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);margin-top:2px;" id="user-role"></div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Click photo to update</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="profile-fields"></div>
+        </div>
+      </div>
+
+      <div class="card" id="courses-card" style="display:none;">
+        <div class="card-header"><h2>Enrolled Courses</h2></div>
+        <div style="overflow-x:auto;">
+          <table class="course-table" id="course-table">
+            <thead>
+              <tr><th>Code</th><th>Subject</th><th>Units</th><th>Instructor</th><th>Schedule</th><th>Grade</th></tr>
+            </thead>
+            <tbody id="course-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <strong>Northern Metro College — NMC Academy</strong> &nbsp;·&nbsp; &copy; 2026
+</footer>
+
+<script>
+const TOKEN = localStorage.getItem('academy_token');
+const ROLE  = localStorage.getItem('academy_role');
+if (!TOKEN) window.location = '/login';
+function logout() { localStorage.clear(); window.location = '/login'; }
+function authH() { return { 'Authorization': 'Bearer ' + TOKEN }; }
+
+if (ROLE === 'it_staff' || ROLE === 'admin') {
+  document.getElementById('inbox-link').style.display = '';
+  document.getElementById('sidebar-inbox').style.display = '';
+}
+
+function field(label, value) {
+  return `<div style="padding:12px 0;border-bottom:1px solid var(--border);">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">${label}</div>
+    <div style="font-size:14px;color:var(--text);">${value || '—'}</div>
+  </div>`;
+}
+
+function setAvatar(photoUrl, initials) {
+  if (photoUrl) {
+    document.getElementById('avatar-img').src = photoUrl + '?t=' + Date.now();
+    document.getElementById('avatar-img').style.display = 'block';
+    document.getElementById('avatar-initials').style.display = 'none';
+    // Update sidebar too
+    const sbAv = document.getElementById('sb-avatar');
+    if (sbAv) { sbAv.innerHTML = `<img src="${photoUrl}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; }
+  } else {
+    document.getElementById('avatar-initials').textContent = initials;
+    document.getElementById('avatar-initials').style.display = 'flex';
+    document.getElementById('avatar-img').style.display = 'none';
+  }
+}
+
+async function loadProfile() {
+  const res  = await fetch('/api/users/me', { headers: authH() });
+  const data = await res.json();
+  document.getElementById('loading').style.display = 'none';
+  if (!res.ok) return;
+
+  const u = data.user;
+  const initials = `${(u.first_name||'')[0]}${(u.last_name||'')[0]}`.toUpperCase();
+
+  document.getElementById('full-name').textContent = `${u.first_name} ${u.last_name}`;
+  document.getElementById('user-role').textContent = u.role.replace('_',' ');
+  document.getElementById('sb-name').textContent   = `${u.first_name} ${u.last_name}`;
+  document.getElementById('sb-role').textContent   = u.role.replace('_',' ');
+  document.getElementById('sb-sid').textContent    = u.student_id ? `ID: ${u.student_id}` : u.department || '';
+
+  // Photo or initials
+  const photoUrl = u.photo ? `/api/users/photos/${u.photo}` : null;
+  setAvatar(photoUrl, initials);
+
+  document.getElementById('profile-fields').innerHTML =
+    field('Email Address', u.email) +
+    field('Student ID', u.student_id) +
+    field('Department / College', u.department) +
+    field('Account Role', u.role.replace('_',' ')) +
+    field('Account Created', new Date(u.created_at).toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'})) +
+    field('User ID', u.id);
+
+  document.getElementById('profile-card').style.display = '';
+
+  // Courses
+  const courses = data.courses || [];
+  if (courses.length) {
+    document.getElementById('course-body').innerHTML = courses.map(c => `
+      <tr>
+        <td><strong>${c.code}</strong></td>
+        <td>${c.title}</td>
+        <td>${c.units}</td>
+        <td>${c.instructor}</td>
+        <td style="font-size:12px;">${c.schedule || '—'}</td>
+        <td>${c.grade ? `<span class="badge badge-green">${c.grade}</span>` : '<span class="badge badge-muted">INC</span>'}</td>
+      </tr>
+    `).join('');
+    document.getElementById('courses-card').style.display = '';
+  }
+}
+
+// Photo upload handler
+document.getElementById('photo-input').addEventListener('change', async function() {
+  const file = this.files[0];
+  if (!file) return;
+  const status = document.getElementById('photo-status');
+  status.textContent = 'Uploading…';
+
+  const fd = new FormData();
+  fd.append('photo', file);
+
+  try {
+    const res  = await fetch('/api/users/me/photo', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + TOKEN },
+      body: fd,
+    });
+    const data = await res.json();
+    if (res.ok) {
+      status.textContent = 'Updated ✓';
+      status.style.color = 'var(--green)';
+      setAvatar(data.photo, '');
+      setTimeout(() => { status.textContent = ''; }, 3000);
+    } else {
+      status.textContent = data.error || 'Upload failed';
+      status.style.color = 'var(--err,#c00)';
+    }
+  } catch {
+    status.textContent = 'Error uploading';
+    status.style.color = 'var(--err,#c00)';
+  }
+  this.value = '';
+});
+
+loadProfile();
+</script>
+</body>
+</html>
