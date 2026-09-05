@@ -12,6 +12,10 @@ GITHUB_REPO="https://github.com/ruur31337/nmc-lab.git"
 
 echo "==> [nmc] Starting lab provisioning (lab IP: $LAB_IP)"
 
+# ── 0. Force DNS (VMware NAT sometimes doesn't pass DNS during provisioning) ──
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+
 # ── 1. System update ──────────────────────────────────────────────────────────
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
