@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% block title %}Admissions{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================ HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">Enrollment Open &mdash; AY 2026&ndash;2027</div>
+      <h1 class="hero-title">Shape Your<br><em>Future</em> at NMC</h1>
+      <p class="hero-subtitle">Excellence in Education Since 1982</p>
+      <p class="hero-desc">
+        Northern Metro College offers quality Bachelor's degree programs
+        in Computing, Engineering, Health Sciences, and Business
+        &mdash; shaping leaders for the nation.
+      </p>
+      <div class="hero-ctas">
+        <a href="/register" class="btn btn-gold btn-lg">Apply Now &rarr;</a>
+        <a href="/login" class="btn btn-outline-inv btn-lg">Track Application</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>40+</strong><span>Years of Excellence</span></div>
+        <div class="hero-stat"><strong>18K+</strong><span>Alumni Nationwide</span></div>
+        <div class="hero-stat"><strong>96%</strong><span>Board Exam Passers</span></div>
+      </div>
+    </div>
+    <div class="hero-photo-wrap">
+      <div class="hero-badge-2">
+        <strong>CHED Recognized</strong>
+        <span>ISO 9001:2015</span>
+      </div>
+      <div class="hero-photo-card">
+        <img src="/static/images/students.jpg" alt="NMC Students on Campus" loading="eager">
+      </div>
+      <div class="hero-badge">
+        <strong>#1</strong>
+        <span>Metro Manila Board Topnotchers 2025</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ANNOUNCEMENT -->
+<div class="announce-bar">
+  <div class="announce-inner">
+    <span class="announce-tag">Important</span>
+    <span>
+      Online applications for AY 2026&ndash;2027 are now open.
+      Deadline for early admission: <strong>March 31, 2026</strong>.
+      &nbsp;<a href="/register">Apply today &rarr;</a>
+    </span>
+  </div>
+</div>
+
+<!-- ============================================================ STEPS -->
+<div class="steps-banner">
+  <div class="steps-inner">
+    <div class="section-eyebrow">How to Apply</div>
+    <h2 class="section-title" style="font-size:26px;margin-bottom:0;">Four Simple Steps to Enrollment</h2>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <h3>Create Account</h3>
+        <p>Register online and complete your applicant profile with accurate personal information.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <h3>Submit Application</h3>
+        <p>Fill out the admission form and upload your required documents for your chosen program.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <h3>Admission Review</h3>
+        <p>The Admission Office evaluates your application. You will be notified of the result via email.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <h3>Enroll</h3>
+        <p>Upon acceptance, complete enrollment by paying tuition and submitting original documents.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ PROGRAMS -->
+<section class="section" id="programs">
+  <div class="section-inner">
+    <div class="section-eyebrow">Academic Programs</div>
+    <h2 class="section-title">Find Your College</h2>
+    <p class="section-lead">
+      Explore degree programs designed for the demands of modern industry,
+      taught by experienced faculty with real-world expertise.
+    </p>
+    <div class="programs-grid">
+
+      <div class="program-card">
+        <div class="program-photo">
+          <img src="/static/images/college-computing.jpg" alt="College of Computing and Technology" loading="lazy">
+          <div class="program-photo-overlay"></div>
+          <div class="program-photo-label">Computing &amp; Technology</div>
+        </div>
+        <div class="program-body">
+          <div class="program-tag">College of Computing</div>
+          <ul class="program-courses">
+            <li>BS Information Technology</li>
+            <li>BS Computer Science</li>
+            <li>BS Information Systems</li>
+          </ul>
+          <div class="program-footer">
+            <span>4-Year Program</span>
+            <span>&#9733; Top Rated</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-photo">
+          <img src="/static/images/college-engineering.jpg" alt="College of Engineering" loading="lazy">
+          <div class="program-photo-overlay"></div>
+          <div class="program-photo-label">Engineering</div>
+        </div>
+        <div class="program-body">
+          <div class="program-tag">College of Engineering</div>
+          <ul class="program-courses">
+            <li>BS Civil Engineering</li>
+            <li>BS Electrical Engineering</li>
+            <li>BS Electronics Engineering</li>
+          </ul>
+          <div class="program-footer">
+            <span>4–5 Year Program</span>
+            <span>CHED CoE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-photo">
+          <img src="/static/images/college-health.jpg" alt="College of Health Sciences" loading="lazy">
+          <div class="program-photo-overlay"></div>
+          <div class="program-photo-label">Health Sciences</div>
+        </div>
+        <div class="program-body">
+          <div class="program-tag">College of Health Sciences</div>
+          <ul class="program-courses">
+            <li>BS Nursing</li>
+            <li>BS Pharmacy</li>
+            <li>BS Medical Technology</li>
+          </ul>
+          <div class="program-footer">
+            <span>4-Year Program</span>
+            <span>96% PRC Passers</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="program-card">
+        <div class="program-photo">
+          <img src="/static/images/college-business.jpg" alt="College of Business and Management" loading="lazy">
+          <div class="program-photo-overlay"></div>
+          <div class="program-photo-label">Business &amp; Management</div>
+        </div>
+        <div class="program-body">
+          <div class="program-tag">College of Business</div>
+          <ul class="program-courses">
+            <li>BS Accountancy</li>
+            <li>BS Business Administration</li>
+            <li>BS Entrepreneurship</li>
+          </ul>
+          <div class="program-footer">
+            <span>4-Year Program</span>
+            <span>CPA Board Ready</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ REQUIREMENTS -->
+<section class="section section--stone" id="requirements">
+  <div class="section-inner">
+    <div class="req-grid">
+      <div class="req-visual">
+        <img src="/static/images/students.jpg" alt="NMC Campus" loading="lazy">
+      </div>
+      <div>
+        <div class="section-eyebrow">Admission Requirements</div>
+        <h2 class="section-title">What You Need to Apply</h2>
+        <p class="section-lead" style="margin-bottom:32px;">
+          Prepare the following documents to complete your application.
+          Originals will be submitted upon enrollment.
+        </p>
+        <div class="req-list">
+          <div class="req-item">
+            <div class="req-num">1</div>
+            <div class="req-body">
+              <h3>Senior High School Card (SF9 / Form 138)</h3>
+              <p>Original and photocopy of your latest report card with complete grades and GWA.</p>
+            </div>
+          </div>
+          <div class="req-item">
+            <div class="req-num">2</div>
+            <div class="req-body">
+              <h3>PSA-Issued Birth Certificate</h3>
+              <p>Original PSA security paper copy of your birth certificate.</p>
+            </div>
+          </div>
+          <div class="req-item">
+            <div class="req-num">3</div>
+            <div class="req-body">
+              <h3>Certificate of Good Moral Character</h3>
+              <p>Signed and sealed by your principal or guidance counselor from your last school.</p>
+            </div>
+          </div>
+          <div class="req-item">
+            <div class="req-num">4</div>
+            <div class="req-body">
+              <h3>2&times;2 ID Photos (4 pieces)</h3>
+              <p>Recent color photos with white background, printed on photo paper.</p>
+            </div>
+          </div>
+          <div class="req-item">
+            <div class="req-num">5</div>
+            <div class="req-body">
+              <h3>Government-Issued ID</h3>
+              <p>PhilSys, passport, UMID, or any valid government-issued identification.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ STUDENT LIFE -->
+<section class="section">
+  <div class="section-inner">
+    <div class="students-grid">
+      <div class="students-photo">
+        <img src="/static/images/college-computing.jpg" alt="NMC Student Life" loading="lazy">
+      </div>
+      <div>
+        <div class="section-eyebrow">Campus Life</div>
+        <h2 class="section-title">More Than Just a Degree</h2>
+        <p style="font-size:15px;color:var(--text-muted);line-height:1.75;margin-bottom:8px;">
+          At NMC, students thrive inside and outside the classroom.
+          From national competitions to community outreach, the NMC experience
+          builds leaders, not just graduates.
+        </p>
+        <div class="fact-list">
+          <div class="fact-item">
+            <div class="fact-icon">🏆</div>
+            <div class="fact-body">
+              <h3>National Award Winners</h3>
+              <p>Multiple CHED-recognized student organizations and board topnotchers every year.</p>
+            </div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-icon">🤝</div>
+            <div class="fact-body">
+              <h3>Industry Partnerships</h3>
+              <p>OJT and internship placements with over 200 partner companies nationwide.</p>
+            </div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-icon">📚</div>
+            <div class="fact-body">
+              <h3>Research-Forward Faculty</h3>
+              <p>Taught by PhDs, licensed professionals, and industry practitioners.</p>
+            </div>
+          </div>
+          <div class="fact-item">
+            <div class="fact-icon">🌐</div>
+            <div class="fact-body">
+              <h3>Global Opportunities</h3>
+              <p>Student exchange programs with universities in Japan, South Korea, and Australia.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-inner">
+    <div>
+      <h2>Ready to Begin Your NMC Journey?</h2>
+      <p>Applications for Academic Year 2026&ndash;2027 are now open. Secure your slot today.</p>
+    </div>
+    <div class="cta-actions">
+      <a href="/register" class="btn btn-gold btn-lg">Apply Online &rarr;</a>
+      <a href="/login" class="btn btn-outline-inv">Track My Application</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

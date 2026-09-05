@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Submit Application{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Admission Application</h1>
+    <p class="text-muted">Academic Year 2026–2027</p>
+  </div>
+
+  <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+  <div id="success-msg" class="alert alert-success" style="display:none;"></div>
+
+  <form id="apply-form" class="apply-form" enctype="multipart/form-data">
+
+    <section class="form-section">
+      <h2>Program Selection</h2>
+      <div class="form-group">
+        <label for="program">Degree Program <span class="required">*</span></label>
+        <select id="program" name="program" required>
+          <option value="">— Select a program —</option>
+          <optgroup label="College of Computing">
+            <option>Bachelor of Science in Information Technology</option>
+            <option>Bachelor of Science in Computer Science</option>
+            <option>Bachelor of Science in Information Systems</option>
+          </optgroup>
+          <optgroup label="College of Engineering">
+            <option>Bachelor of Science in Civil Engineering</option>
+            <option>Bachelor of Science in Electrical Engineering</option>
+            <option>Bachelor of Science in Electronics Engineering</option>
+          </optgroup>
+          <optgroup label="College of Health Sciences">
+            <option>Bachelor of Science in Nursing</option>
+            <option>Bachelor of Science in Pharmacy</option>
+            <option>Bachelor of Science in Medical Technology</option>
+          </optgroup>
+          <optgroup label="College of Business">
+            <option>Bachelor of Science in Accountancy</option>
+            <option>Bachelor of Science in Business Administration</option>
+            <option>Bachelor of Science in Entrepreneurship</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="strand">Senior High School Strand</label>
+        <select id="strand" name="strand">
+          <option value="">— Select strand —</option>
+          <option>STEM</option><option>ABM</option><option>HUMSS</option>
+          <option>ICT</option><option>TVL</option><option>GAS</option><option>Other</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Previous School</h2>
+      <div class="form-group">
+        <label for="prev_school">Name of Senior High School <span class="required">*</span></label>
+        <input type="text" id="prev_school" name="prev_school"
+               placeholder="e.g. Paranaque National High School" required>
+      </div>
+      <div class="form-group">
+        <label for="gwa">General Weighted Average (GWA)</label>
+        <input type="number" id="gwa" name="gwa" min="70" max="100"
+               step="0.01" placeholder="e.g. 88.50">
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Applicant Photo</h2>
+      <p class="text-muted" style="font-size:13px;margin-bottom:16px;">
+        Upload a recent <strong>2x2 ID photo</strong> (white background, formal attire).
+        Accepted formats: JPG, PNG. Max size: 2MB.
+      </p>
+      <div style="display:flex;gap:24px;align-items:flex-start;">
+        <div id="photo-preview-wrap" style="width:96px;height:96px;border:2px dashed var(--border);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--cream-dark,#f0ede8);flex-shrink:0;">
+          <span id="photo-placeholder" style="font-size:28px;">📷</span>
+          <img id="photo-preview" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div style="flex:1;">
+          <div class="form-group" style="margin-bottom:8px;">
+            <label for="photo">2x2 ID Photo <span class="required">*</span></label>
+            <input type="file" id="photo" name="photo" accept="image/jpeg,image/png" required>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);">
+            Photo must clearly show your face. The admission office may request a retake if the photo is unclear or does not meet requirements.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Supporting Documents</h2>
+      <p class="text-muted" style="font-size:13px;margin-bottom:16px;">
+        Upload scanned copies of your required documents. Accepted: PDF, JPG, PNG. Max 5MB per file.
+      </p>
+      <div class="form-group">
+        <label for="doc_tor">Form 138 / Transcript of Records <span class="required">*</span></label>
+        <input type="file" id="doc_tor" name="doc_tor" accept=".pdf,image/jpeg,image/png">
+      </div>
+      <div class="form-group">
+        <label for="doc_psa">PSA Birth Certificate <span class="required">*</span></label>
+        <input type="file" id="doc_psa" name="doc_psa" accept=".pdf,image/jpeg,image/png">
+      </div>
+      <div class="form-group">
+        <label for="doc_good_moral">Certificate of Good Moral Character</label>
+        <input type="file" id="doc_good_moral" name="doc_good_moral" accept=".pdf,image/jpeg,image/png">
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <a href="/dashboard" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-primary" id="submit-btn">Submit Application</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Preview photo before upload
+document.getElementById('photo').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('photo-preview').src = e.target.result;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('photo-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('apply-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const err = document.getElementById('error-msg');
+  const ok  = document.getElementById('success-msg');
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  err.style.display = 'none';
+  ok.style.display  = 'none';
+
+  const token = localStorage.getItem('nmc_token');
+  if (!token) {
+    err.textContent = 'Session expired. Please sign in again.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    return;
+  }
+
+  // Use FormData so files are included
+  const fd = new FormData(this);
+
+  try {
+    const res  = await fetch('/api/v2/applications', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: fd,
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      ok.innerHTML = `✓ Application submitted! Reference No.: <strong>${data.application.ref_no}</strong>`;
+      ok.style.display = 'block';
+      setTimeout(() => window.location = '/dashboard', 2500);
+    } else {
+      err.textContent = data.error || 'Submission failed.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }
+  } catch {
+    err.textContent = 'Network error. Please try again.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Submit Application';
+  }
+});
+</script>
+{% endblock %}

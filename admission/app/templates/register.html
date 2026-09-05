@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Apply — Register{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:720px;">
+  <div class="page-header">
+    <div>
+      <h1>Admission Application</h1>
+      <p class="text-muted">Academic Year 2026–2027 &mdash; Create your applicant account</p>
+    </div>
+  </div>
+
+  <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+  <div id="success-msg" class="alert alert-success" style="display:none;"></div>
+
+  <form id="register-form" class="apply-form" autocomplete="off" novalidate>
+
+    <section class="form-section">
+      <h2>Personal Information</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="last_name">Last Name <span class="required">*</span></label>
+          <input type="text" id="last_name" name="last_name" placeholder="dela Cruz" required>
+        </div>
+        <div class="form-group">
+          <label for="first_name">First Name <span class="required">*</span></label>
+          <input type="text" id="first_name" name="first_name" placeholder="Juan" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
+          <input type="date" id="date_of_birth" name="date_of_birth" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Contact Number <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="09XX-XXX-XXXX" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="address">Home Address <span class="required">*</span></label>
+        <input type="text" id="address" name="address"
+               placeholder="Unit/House No., Street, Barangay, City" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="zip_code">ZIP / Postal Code <span class="required">*</span></label>
+          <input type="text" id="zip_code" name="zip_code" placeholder="1700" maxlength="10" required>
+        </div>
+        <div class="form-group" style="visibility:hidden;">
+          <label>&nbsp;</label>
+          <input type="text">
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Educational Background</h2>
+      <div class="form-group">
+        <label for="prev_school">Senior High School / Last School Attended <span class="required">*</span></label>
+        <input type="text" id="prev_school" name="prev_school"
+               placeholder="e.g. Paranaque National High School" required>
+      </div>
+      <div class="form-group">
+        <label for="program">Program Applying For <span class="required">*</span></label>
+        <select id="program" name="program" required>
+          <option value="">— Select a program —</option>
+          <optgroup label="College of Computing">
+            <option>Bachelor of Science in Information Technology</option>
+            <option>Bachelor of Science in Computer Science</option>
+            <option>Bachelor of Science in Information Systems</option>
+          </optgroup>
+          <optgroup label="College of Engineering">
+            <option>Bachelor of Science in Civil Engineering</option>
+            <option>Bachelor of Science in Electrical Engineering</option>
+            <option>Bachelor of Science in Electronics Engineering</option>
+          </optgroup>
+          <optgroup label="College of Health Sciences">
+            <option>Bachelor of Science in Nursing</option>
+            <option>Bachelor of Science in Pharmacy</option>
+            <option>Bachelor of Science in Medical Technology</option>
+          </optgroup>
+          <optgroup label="College of Business">
+            <option>Bachelor of Science in Accountancy</option>
+            <option>Bachelor of Science in Business Administration</option>
+            <option>Bachelor of Science in Entrepreneurship</option>
+          </optgroup>
+        </select>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Account Credentials</h2>
+      <div class="form-group">
+        <label for="email">Email Address <span class="required">*</span></label>
+        <input type="email" id="email" name="email"
+               placeholder="yourname@email.com" autocomplete="email" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password <span class="hint">(min. 8 characters)</span></label>
+          <input type="password" id="password" name="password" required minlength="8">
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="agree" required>
+          I have read and agree to the NMC
+          <a href="#" target="_blank">Data Privacy Policy</a>
+          and consent to the collection of my personal information.
+        </label>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <a href="/login" class="btn btn-outline">Back to Sign In</a>
+      <button type="submit" class="btn btn-primary" id="register-btn">
+        Submit Application
+      </button>
+    </div>
+  </form>
+
+  <p class="auth-footer" style="margin-top:20px;">
+    Your application will be reviewed by the Admission Office.<br>
+    You will be notified via email once your account is activated.
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('register-btn');
+  const err = document.getElementById('error-msg');
+  const ok  = document.getElementById('success-msg');
+
+  err.style.display = 'none';
+  ok.style.display  = 'none';
+
+  const pw  = document.getElementById('password').value;
+  const cpw = document.getElementById('confirm_password').value;
+  if (pw !== cpw) {
+    err.textContent = 'Passwords do not match.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  const body = {
+    first_name:    document.getElementById('first_name').value.trim(),
+    last_name:     document.getElementById('last_name').value.trim(),
+    email:         document.getElementById('email').value.trim(),
+    password:      pw,
+    phone:         document.getElementById('phone').value.trim(),
+    date_of_birth: document.getElementById('date_of_birth').value,
+    address:       document.getElementById('address').value.trim(),
+    zip_code:      document.getElementById('zip_code').value.trim(),
+    prev_school:   document.getElementById('prev_school').value.trim(),
+    program:       document.getElementById('program').value,
+  };
+
+  try {
+    const res  = await fetch('/api/v2/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      ok.innerHTML = `<strong>Application submitted!</strong><br>
+        Reference No.: <strong>${data.ref_no}</strong><br>
+        ${data.message}`;
+      ok.style.display = 'block';
+      document.getElementById('register-form').style.display = 'none';
+    } else {
+      err.textContent = data.error || 'Submission failed. Please check your entries.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }
+  } catch (ex) {
+    err.textContent = 'Unable to reach the server. Please try again.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Submit Application';
+  }
+});
+</script>
+{% endblock %}

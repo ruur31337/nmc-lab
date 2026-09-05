@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}My Application{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Welcome, {{ user.first_name }}!</h1>
+    <p class="text-muted">Track and manage your admission application below.</p>
+  </div>
+
+  <div id="app-status-card" class="status-card">
+    <div class="loading-spinner">Loading your application…</div>
+  </div>
+
+  <div class="action-bar">
+    <a href="/apply" class="btn btn-primary" id="new-app-btn" style="display:none;">
+      Submit Application
+    </a>
+  </div>
+
+  <div class="info-cards">
+    <div class="info-card">
+      <h3>Admission Steps</h3>
+      <ol class="step-list">
+        <li class="step done">Create an account ✓</li>
+        <li class="step" id="step-apply">Submit application form</li>
+        <li class="step">Wait for evaluation</li>
+        <li class="step">Attend NMC entrance examination</li>
+        <li class="step">Receive admission decision</li>
+        <li class="step">Enroll and pay tuition</li>
+      </ol>
+    </div>
+    <div class="info-card">
+      <h3>Important Dates</h3>
+      <table class="dates-table">
+        <tr><td>Application period</td><td>Aug 1 – Oct 31, 2026</td></tr>
+        <tr><td>Entrance exam (Batch 1)</td><td>Sep 20, 2026</td></tr>
+        <tr><td>Entrance exam (Batch 2)</td><td>Oct 25, 2026</td></tr>
+        <tr><td>Release of results</td><td>Nov 15, 2026</td></tr>
+        <tr><td>Enrollment period</td><td>Nov 18 – Dec 12, 2026</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(async function() {
+  const token = localStorage.getItem('nmc_token');
+  const card  = document.getElementById('app-status-card');
+
+  if (!token) {
+    card.innerHTML = '<p class="text-muted">Session expired. <a href="/login">Sign in again</a>.</p>';
+    return;
+  }
+
+  const res  = await fetch('/api/v2/applications', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  const data = await res.json();
+  const apps = data.applications || [];
+
+  if (apps.length === 0) {
+    card.innerHTML = `
+      <div class="empty-state">
+        <p>You have not submitted an application yet.</p>
+      </div>`;
+    document.getElementById('new-app-btn').style.display = 'inline-flex';
+    document.getElementById('step-apply').classList.add('active');
+  } else {
+    const a   = apps[0];
+    const cls = { pending: 'status--pending', under_review: 'status--review',
+                  accepted: 'status--accepted', rejected: 'status--rejected',
+                  waitlisted: 'status--wait' }[a.status] || '';
+    card.innerHTML = `
+      <div class="app-detail">
+        <div class="app-ref">Reference No.: <strong>${a.ref_no}</strong></div>
+        <div class="app-program">${a.program}</div>
+        <div class="app-meta">
+          Submitted: ${new Date(a.submitted_at).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'})}
+        </div>
+        <div class="app-status-badge ${cls}">${a.status.replace('_', ' ').toUpperCase()}</div>
+        ${a.remarks ? `<div class="app-remarks"><strong>Remarks:</strong> ${a.remarks}</div>` : ''}
+      </div>`;
+  }
+})();
+</script>
+{% endblock %}

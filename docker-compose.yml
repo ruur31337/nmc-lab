@@ -17,7 +17,6 @@ services:
   # ── App 1: www.nmc.local (main website — Apache/PHP)
   main-web:
     build: ./main-web
-    image: ruur1337/nmc-main-web:latest
     networks:
       - nmc-school
     restart: unless-stopped
@@ -25,21 +24,20 @@ services:
   # ── App 2: academy.nmc.local (student/faculty portal — Node.js)
   academy:
     build: ./academy
-    image: ruur1337/nmc-academy:latest
     networks:
       - nmc-school
     restart: unless-stopped
 
   # ── App 3: admission.nmc.local (admission portal — Flask)
   admission:
-    image: ruur1337/nmc-admission:latest
+    build: ./admission
     networks:
       - nmc-school
     restart: unless-stopped
 
   # ── App 4: registrar.nmc.local (registrar system — Apache/PHP)
   registrar:
-    image: ruur1337/nmc-registrar:latest
+    build: ./registrar
     networks:
       - nmc-school
     depends_on:
@@ -49,7 +47,7 @@ services:
 
   # ── Registrar database — MySQL 8 (pre-seeded)
   registrar-db:
-    image: ruur1337/nmc-registrar-db:latest
+    build: ./registrar-db
     environment:
       MYSQL_ROOT_PASSWORD: nmcroot2025
       MYSQL_DATABASE: nmc_registrar
@@ -64,7 +62,7 @@ services:
 
   # ── Registrar staff bot — simulates staff reviewing pending requests
   registrar-bot:
-    image: ruur1337/nmc-registrar-bot:latest
+    build: ./registrar-bot
     environment:
       REGISTRAR_URL: http://registrar:80
       BOT_USER: acruz

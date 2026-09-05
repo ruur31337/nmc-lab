@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NMC Admission Portal{% endblock %} — Northern Metro College</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+
+<!-- Top info bar -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <span>📍 Taguig City, Metro Manila</span>
+    <span>📞 (02) 8XXX-XXXX</span>
+    <span>✉️ admission@nmc.edu.ph</span>
+    <span class="topbar-sep">|</span>
+    <span>Enrollment Open: AY 2026–2027</span>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="brand">
+      <div class="brand-seal">
+        <svg viewBox="0 0 60 60" width="54" height="54" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="30" r="29" fill="#6B0F1A" stroke="#C9961A" stroke-width="2"/>
+          <circle cx="30" cy="30" r="23" fill="none" stroke="#C9961A" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="30" y="25" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#FAF0DC">NMC</text>
+          <text x="30" y="35" text-anchor="middle" font-family="Georgia,serif" font-size="6" fill="#C9961A" letter-spacing="1">EST. 1982</text>
+          <path d="M14,42 Q30,50 46,42" fill="none" stroke="#C9961A" stroke-width="1"/>
+          <text x="30" y="48" text-anchor="middle" font-family="Georgia,serif" font-size="5" fill="#C9961A" letter-spacing="0.5">METRO · MANILA</text>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="school-name">Northern Metro College</span>
+        <span class="portal-label">Office of Admissions</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/#programs">Programs</a>
+      <a href="/#requirements">Requirements</a>
+      <a href="/#contact">Contact</a>
+      {% if user %}
+        <a href="/dashboard" class="nav-btn">My Application</a>
+        <a href="/logout" class="nav-signout">Sign out</a>
+      {% else %}
+        <a href="/register" class="nav-apply">Apply Now</a>
+        <a href="/login" class="nav-btn">Sign In</a>
+      {% endif %}
+    </nav>
+  </div>
+  <div class="header-rule"></div>
+</header>
+
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <svg viewBox="0 0 60 60" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="30" r="29" fill="rgba(201,150,26,.15)" stroke="#C9961A" stroke-width="1.5"/>
+          <text x="30" y="25" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#FAF0DC">NMC</text>
+          <text x="30" y="35" text-anchor="middle" font-family="Georgia,serif" font-size="6" fill="#C9961A" letter-spacing="1">EST. 1982</text>
+        </svg>
+        <div>
+          <div class="footer-school">Northern Metro College</div>
+          <div class="footer-tagline">Shaping Leaders for the Nation</div>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Admissions</h4>
+          <a href="/register">Apply Online</a>
+          <a href="/#requirements">Requirements</a>
+          <a href="/#programs">Programs</a>
+          <a href="/login">Track Application</a>
+        </div>
+        <div class="footer-col">
+          <h4>Colleges</h4>
+          <span>Computing &amp; Technology</span>
+          <span>Engineering</span>
+          <span>Health Sciences</span>
+          <span>Business &amp; Management</span>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <span>admission@nmc.edu.ph</span>
+          <span>(02) 8XXX-XXXX local 101</span>
+          <span>Building A, Room 102</span>
+          <span>Mon–Fri · 8:00 AM – 5:00 PM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-inner">
+      <span>&copy; 2026 Northern Metro College. All rights reserved.</span>
+      <span>CHED Recognized · ISO 9001:2015 Certified</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/static/js/bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

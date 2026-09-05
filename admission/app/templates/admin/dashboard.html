@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1>Admission Office</h1>
+      <p class="text-muted">Logged in as {{ user.first_name }} {{ user.last_name }}
+        &mdash; <span class="role-badge">{{ user.role.replace('_', ' ').title() }}</span>
+      </p>
+    </div>
+    {% if user.role == 'admin' %}
+    <div class="admin-actions">
+      <button class="btn btn-outline" onclick="showCreateAcademy()">+ Create Academy Account</button>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item"><span id="stat-total">—</span><label>Total Applications</label></div>
+    <div class="stat-item"><span id="stat-pending">—</span><label>Pending</label></div>
+    <div class="stat-item"><span id="stat-accepted">—</span><label>Accepted</label></div>
+    <div class="stat-item"><span id="stat-rejected">—</span><label>Rejected</label></div>
+  </div>
+
+  <!-- Pending registrations -->
+  <h2 style="font-size:16px;color:var(--maroon);margin-bottom:12px;">Pending Approval</h2>
+  <div class="table-wrapper" style="margin-bottom:28px;">
+    <table class="data-table" id="pending-table">
+      <thead>
+        <tr>
+          <th>Applicant</th>
+          <th>Program</th>
+          <th>Previous School</th>
+          <th>Submitted</th>
+          <th style="min-width:180px;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="pending-body">
+        <tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- All Applications -->
+  <h2 style="font-size:16px;color:var(--maroon);margin-bottom:12px;">All Applications</h2>
+  <div class="table-wrapper">
+    <table class="data-table" id="applicants-table">
+      <thead>
+        <tr>
+          <th>Ref No.</th>
+          <th>Applicant</th>
+          <th>Email</th>
+          <th>Program</th>
+          <th>GWA</th>
+          <th>Status</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="applicants-body">
+        <tr><td colspan="7" class="text-center text-muted">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Academy student roster — live from Academy DB -->
+  <div style="margin-top:32px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h2 style="font-size:16px;color:var(--maroon);margin:0;">NMC Academy — Active Students</h2>
+      <button class="btn btn-sm btn-outline" onclick="loadAcademyStudents()" style="font-size:12px;">&#8635; Refresh</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>Provisioned</th><th>Status</th></tr>
+        </thead>
+        <tbody id="academy-students-body">
+          <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if user.role == 'admin' %}
+<!-- Reject confirmation modal -->
+<div id="reject-modal" class="modal" style="display:none;">
+  <div class="modal-backdrop" onclick="closeRejectModal()"></div>
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <h2>Reject Application</h2>
+      <button onclick="closeRejectModal()" class="modal-close">&times;</button>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:12px;">
+      This will reject the applicant's registration and mark the application as <strong>Rejected</strong>.
+    </p>
+    <div class="form-group">
+      <label>Reason for Rejection</label>
+      <select id="reject-reason" style="margin-bottom:0;">
+        <option value="Does not meet minimum GWA requirement">Does not meet minimum GWA requirement</option>
+        <option value="Incomplete requirements submitted">Incomplete requirements submitted</option>
+        <option value="Program quota has been reached">Program quota has been reached</option>
+        <option value="Failed entrance examination">Failed entrance examination</option>
+        <option value="Duplicate application detected">Duplicate application detected</option>
+        <option value="Other">Other — see remarks</option>
+      </select>
+    </div>
+    <div id="reject-error" class="alert alert-error" style="display:none;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px;">
+      <button onclick="closeRejectModal()" class="btn btn-outline">Cancel</button>
+      <button onclick="confirmReject()" class="btn" style="background:var(--err);color:#fff;border-color:var(--err);"
+              id="reject-confirm-btn">Reject Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Academy Account Modal -->
+<div id="academy-modal" class="modal" style="display:none;">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Create Academy Student Account</h2>
+      <button onclick="closeModal()" class="modal-close">&times;</button>
+    </div>
+    <div id="modal-error" class="alert alert-error" style="display:none;"></div>
+    <div id="modal-success" class="alert alert-success" style="display:none;"></div>
+    <form id="academy-form" class="auth-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="ac-first" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="ac-last" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="ac-email" placeholder="lastname@student.nmc.local" required>
+      </div>
+      <div class="form-group">
+        <label>Temporary Password</label>
+        <input type="password" id="ac-pass" required>
+      </div>
+      <div class="form-group">
+        <label>Student ID <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(optional)</span></label>
+        <input type="text" id="ac-sid" placeholder="2026-XXXXX">
+      </div>
+      <div class="form-actions">
+        <button type="button" onclick="closeModal()" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="ac-btn">Create Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const token = localStorage.getItem('nmc_token');
+let pendingRejectUuid = null;
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+}
+
+// ── Load stats + applicants table ────────────────────────────────────────────
+async function loadApplicants() {
+  const res  = await fetch('/admin/api/v1/applicants', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  if (res.status === 401 || res.status === 403) {
+    document.getElementById('applicants-body').innerHTML =
+      '<tr><td colspan="7" class="text-muted text-center">Access restricted.</td></tr>';
+    return;
+  }
+  const data = await res.json();
+  const apps = data.applicants || [];
+
+  const counts = { pending:0, under_review:0, accepted:0, rejected:0 };
+  apps.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++; });
+
+  document.getElementById('stat-total').textContent    = apps.length;
+  document.getElementById('stat-pending').textContent  = counts.pending;
+  document.getElementById('stat-accepted').textContent = counts.accepted;
+  document.getElementById('stat-rejected').textContent = counts.rejected;
+
+  const tbody = document.getElementById('applicants-body');
+  tbody.innerHTML = apps.length ? apps.map(a => {
+    const cls = {
+      pending:'status--pending', under_review:'status--review',
+      accepted:'status--accepted', rejected:'status--rejected',
+      waitlisted:'status--wait'
+    }[a.status] || '';
+    return `<tr>
+      <td><code>${a.ref_no}</code></td>
+      <td>${a.applicant.last_name}, ${a.applicant.first_name}</td>
+      <td>${a.applicant.email}</td>
+      <td style="font-size:12px;">${a.program}</td>
+      <td>${a.gwa || '—'}</td>
+      <td><span class="status-badge ${cls}">${a.status.replace('_',' ')}</span></td>
+      <td>${formatDate(a.submitted_at)}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="text-center text-muted">No applications yet.</td></tr>';
+}
+
+// ── Load pending table with Approve + Reject ──────────────────────────────────
+async function loadPending() {
+  const res  = await fetch('/admin/api/v1/applicants', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  if (!res.ok) return;
+  const data = await res.json();
+  const pending = (data.applicants || []).filter(a => a.status === 'pending');
+  const tbody   = document.getElementById('pending-body');
+
+  if (!pending.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No pending registrations.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = pending.map(a => {
+    const photoUrl = a.photo ? `/static/${a.photo}` : null;
+    const avatar   = photoUrl
+      ? `<img src="${photoUrl}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">`
+      : `<div style="width:40px;height:40px;border-radius:50%;background:var(--maroon);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">${(a.applicant.first_name[0]||'')+(a.applicant.last_name[0]||'')}</div>`;
+    return `
+    <tr id="row-${a.applicant.uuid}">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${avatar}
+          <div>
+            <div style="font-weight:700;">${a.applicant.last_name}, ${a.applicant.first_name}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${a.applicant.email}</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:12px;">${a.program}</td>
+      <td style="font-size:12px;">${a.prev_school || '—'}</td>
+      <td>${formatDate(a.submitted_at)}</td>
+      <td>
+        <div style="display:flex;gap:8px;" id="actions-${a.applicant.uuid}">
+          <button class="btn btn-primary btn-sm"
+            onclick="approveUser('${a.applicant.uuid}', '${a.applicant.first_name} ${a.applicant.last_name}')">
+            ✓ Approve
+          </button>
+          <button class="btn btn-sm" style="background:transparent;border:1.5px solid var(--err);color:var(--err);"
+            onclick="openRejectModal('${a.applicant.uuid}', '${a.applicant.first_name} ${a.applicant.last_name}')">
+            ✕ Reject
+          </button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+}
+
+// ── Approve ───────────────────────────────────────────────────────────────────
+async function approveUser(uuid, name) {
+  const actions = document.getElementById('actions-' + uuid);
+  actions.innerHTML = '<span style="color:var(--text-muted);font-size:13px;">Processing…</span>';
+
+  const res  = await fetch('/admin/api/v1/registrations/' + uuid + '/approve', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    const ac = data.academy || {};
+    actions.innerHTML = `
+      <span style="display:flex;align-items:center;gap:6px;color:var(--ok);font-size:13px;font-weight:600;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#1A7A4A"/><path d="M4.5 8l2.5 2.5 4-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Approved
+      </span>`;
+    if (ac.provisioned) {
+      // Show provisioned credentials banner
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#f0faf4;border:1px solid #a8d8b9;border-radius:8px;padding:14px 16px;margin-top:16px;font-size:13px;';
+      banner.innerHTML = `
+        <div style="font-weight:700;color:#1A7A4A;margin-bottom:8px;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px;margin-right:4px;"><circle cx="8" cy="8" r="8" fill="#1A7A4A"/><path d="M4.5 8l2.5 2.5 4-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Academy Account Provisioned — ${name}
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;color:#2d4a38;">
+          <span style="color:#6b8e7a;font-weight:600;">Email</span><span>${ac.email}</span>
+          <span style="color:#6b8e7a;font-weight:600;">Student ID</span><span><code style="background:#dff0e8;padding:1px 6px;border-radius:3px;">${ac.student_id}</code></span>
+          <span style="color:#6b8e7a;font-weight:600;">Temp Password</span><span><code style="background:#dff0e8;padding:1px 6px;border-radius:3px;">${ac.temp_password}</code></span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#6b8e7a;">Advise the student to change their password on first login.</div>`;
+      document.querySelector('.admin-wrap') && document.querySelector('.admin-wrap').prepend(banner) ||
+        document.body.prepend(banner);
+      // Refresh the Academy students table
+      loadAcademyStudents();
+    }
+    loadApplicants();
+  } else {
+    actions.innerHTML = `<span style="color:var(--err);font-size:13px;">${data.error || 'Failed'}</span>`;
+  }
+}
+
+// ── Reject modal ──────────────────────────────────────────────────────────────
+function openRejectModal(uuid, name) {
+  pendingRejectUuid = uuid;
+  document.getElementById('reject-error').style.display = 'none';
+  document.getElementById('reject-confirm-btn').disabled = false;
+  document.getElementById('reject-confirm-btn').textContent = 'Reject Application';
+  document.getElementById('reject-modal').style.display = 'flex';
+}
+function closeRejectModal() {
+  pendingRejectUuid = null;
+  document.getElementById('reject-modal').style.display = 'none';
+}
+
+async function confirmReject() {
+  if (!pendingRejectUuid) return;
+  const btn    = document.getElementById('reject-confirm-btn');
+  const errEl  = document.getElementById('reject-error');
+  const reason = document.getElementById('reject-reason').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Rejecting…';
+  errEl.style.display = 'none';
+
+  const res  = await fetch('/admin/api/v1/registrations/' + pendingRejectUuid + '/reject', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ reason })
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    const actions = document.getElementById('actions-' + pendingRejectUuid);
+    if (actions) {
+      actions.innerHTML = `
+        <span style="display:flex;align-items:center;gap:6px;color:var(--err);font-size:13px;font-weight:600;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#A01020"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Rejected
+        </span>`;
+    }
+    closeRejectModal();
+    loadApplicants();
+  } else {
+    errEl.textContent = data.error || 'Failed to reject application.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Reject Application';
+  }
+}
+
+// ── Academy modal ─────────────────────────────────────────────────────────────
+function showCreateAcademy() {
+  document.getElementById('modal-error').style.display   = 'none';
+  document.getElementById('modal-success').style.display = 'none';
+  document.getElementById('academy-form').reset();
+  document.getElementById('ac-btn').disabled    = false;
+  document.getElementById('ac-btn').textContent = 'Create Account';
+  document.getElementById('academy-modal').style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('academy-modal').style.display = 'none';
+}
+
+{% if user.role == 'admin' %}
+const academyLog = [];
+
+document.getElementById('academy-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('ac-btn');
+  const err = document.getElementById('modal-error');
+  const ok  = document.getElementById('modal-success');
+
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
+  err.style.display = 'none';
+  ok.style.display  = 'none';
+
+  const payload = {
+    first_name: document.getElementById('ac-first').value.trim(),
+    last_name:  document.getElementById('ac-last').value.trim(),
+    email:      document.getElementById('ac-email').value.trim(),
+    password:   document.getElementById('ac-pass').value,
+    student_id: document.getElementById('ac-sid').value.trim() || null,
+  };
+
+  const res  = await fetch('/admin/api/v1/academy/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    ok.innerHTML = `<strong>Academy account created.</strong> ${payload.first_name} ${payload.last_name} can now log in to NMC Academy.`;
+    ok.style.display = 'block';
+    btn.textContent  = 'Created ✓';
+
+    // Add to provisioning log
+    academyLog.push({
+      name:   `${payload.last_name}, ${payload.first_name}`,
+      email:  payload.email,
+      sid:    payload.student_id || '—',
+      time:   new Date().toLocaleTimeString('en-PH'),
+    });
+    renderAcademyLog();
+  } else {
+    err.textContent = data.error || 'Failed to create Academy account.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+});
+
+function renderAcademyLog() {
+  if (!academyLog.length) return;
+  document.getElementById('academy-log-section').style.display = '';
+  document.getElementById('academy-log-body').innerHTML = academyLog.map(r => `
+    <tr>
+      <td><strong>${r.name}</strong></td>
+      <td>${r.email}</td>
+      <td>${r.sid}</td>
+      <td style="font-size:12px;color:var(--text-muted);">Today, ${r.time}
+        <span class="status-badge status--accepted" style="margin-left:8px;">Provisioned</span>
+      </td>
+    </tr>
+  `).join('');
+}
+{% endif %}
+
+async function loadAcademyStudents() {
+  const tbody = document.getElementById('academy-students-body');
+  if (!tbody) return;
+  try {
+    const res  = await fetch('/admin/api/v1/academy/users', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    const students = data.students || [];
+    if (!students.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px;">No Academy accounts provisioned yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = students.map(s => {
+      const name = `${s.first_name} ${s.last_name}`;
+      const date = new Date(s.created_at).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+      return `<tr>
+        <td><strong>${name}</strong></td>
+        <td style="font-size:13px;">${s.email}</td>
+        <td><code style="font-size:12px;background:var(--cream-dark,#f0ede8);padding:2px 6px;border-radius:4px;">${s.student_id || '—'}</code></td>
+        <td style="font-size:13px;color:var(--text-muted);">${s.department || '—'}</td>
+        <td style="font-size:12px;color:var(--text-muted);">${date}</td>
+        <td><span class="status-badge status--accepted">Active</span></td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--err);padding:16px;">Could not reach Academy service.</td></tr>';
+  }
+}
+
+loadPending();
+loadApplicants();
+loadAcademyStudents();
+</script>
+{% endblock %}

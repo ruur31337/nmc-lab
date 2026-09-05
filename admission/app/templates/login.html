@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-visual">
+    <div class="auth-visual-overlay">
+      <div class="auth-visual-text">
+        <h2>Welcome Back to Northern Metro College</h2>
+        <p>Sign in to track your application status, upload requirements, and receive updates from the Admission Office.</p>
+      </div>
+    </div>
+  </div>
+  <div class="auth-panel">
+    <div class="auth-logo-row">
+      <svg viewBox="0 0 60 60" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="29" fill="#6B0F1A" stroke="#C9961A" stroke-width="2"/>
+        <circle cx="30" cy="30" r="23" fill="none" stroke="#C9961A" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="30" y="25" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#FAF0DC">NMC</text>
+        <text x="30" y="35" text-anchor="middle" font-family="Georgia,serif" font-size="6" fill="#C9961A" letter-spacing="1">EST. 1982</text>
+      </svg>
+      <div class="auth-logo-text">
+        <span class="name">Northern Metro College</span>
+        <span class="sub">Office of Admissions</span>
+      </div>
+    </div>
+    <h1 class="auth-heading">Sign In</h1>
+    <p class="auth-sub">Access your applicant account to track your admission.</p>
+
+    <div id="error-msg" class="alert alert-error" style="display:none;margin-bottom:8px;"></div>
+
+    <form id="login-form" class="auth-form" autocomplete="off" novalidate>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="yourname@email.com"
+               autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password" style="display:flex;justify-content:space-between;align-items:center;">
+          Password
+          <a href="/forgot-password" style="font-size:12px;color:var(--maroon);font-weight:600;">Forgot password?</a>
+        </label>
+        <input type="password" id="password" name="password"
+               autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn" style="width:100%;justify-content:center;margin-top:4px;">
+        Sign In
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      New applicant? <a href="/register">Apply for admission &rarr;</a>
+    </p>
+    <p class="auth-footer" style="margin-top:10px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:14px;">
+      For account issues, contact the Admission Office at<br>
+      <strong>admission@nmc.edu.ph</strong> &middot; (02) 8XXX-XXXX local 101
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('error-msg');
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  err.style.display = 'none';
+
+  const body = {
+    email:    document.getElementById('email').value.trim(),
+    password: document.getElementById('password').value,
+  };
+
+  try {
+    const res  = await fetch('/api/v2/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.access_token) {
+      // Bridge JWT into server session so HTML pages work
+      await fetch('/session/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: data.access_token }),
+      });
+      localStorage.setItem('nmc_token', data.access_token);
+      window.location = '/dashboard';
+    } else {
+      err.textContent = data.error || 'Login failed. Please check your credentials.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  } catch (ex) {
+    err.textContent = 'Unable to reach the server. Please try again.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+});
+</script>
+{% endblock %}
