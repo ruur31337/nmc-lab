@@ -26,7 +26,7 @@ source "vmware-iso" "nmc_lab" {
   guest_os_type = "ubuntu-64"
 
   # Local ISO — update path if needed
-  iso_url      = "file:///C:/Users/Leonel Obina/Documents/ubuntu-22.04.5-live-server-amd64.iso"
+  iso_url      = "file:///C:/Users/Leonel Obina/Documents/nmc-lab/build/ubuntu-22.04.5-live-server-amd64.iso"
   iso_checksum = "none"
 
   http_directory = "http"
