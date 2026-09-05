@@ -83,6 +83,9 @@ iptables -I INPUT -p udp --dport $VPN_PORT -j ACCEPT
 # Allow NMC lab port from VPN subnet only
 iptables -I INPUT -i tun1 -p tcp --dport $NMC_LAB_PORT -j ACCEPT
 
+# Redirect tun1:80 → 9100 so takers use plain http:// URLs without a port
+iptables -t nat -A PREROUTING -i tun1 -p tcp --dport 80 -j REDIRECT --to-port $NMC_LAB_PORT
+
 # Masquerade NMC VPN traffic
 iptables -t nat -A POSTROUTING -s 10.9.0.0/24 -j MASQUERADE
 
